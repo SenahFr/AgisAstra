@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="secSky" x1="0%" y1="0%" x2="20%" y2="100%">
+      <stop offset="0%" stop-color="#241832"/>
+      <stop offset="45%" stop-color="#5c2f3a"/>
+      <stop offset="100%" stop-color="#b9743f"/>
+    </linearGradient>
+    <radialGradient id="secGlow" cx="50%" cy="28%" r="50%">
+      <stop offset="0%" stop-color="#f2c789" stop-opacity="0.5"/>
+      <stop offset="60%" stop-color="#f2c789" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#f2c789" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="grain2">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0"/>
+    </filter>
+  </defs>
+
+  <rect width="900" height="620" fill="url(#secSky)"/>
+  <rect width="900" height="620" fill="url(#secGlow)"/>
+
+  <!-- arch -->
+  <path d="M170 620 L170 300 A280 280 0 0 1 730 300 L730 620 Z"
+        fill="none" stroke="#f2e2bd" stroke-opacity="0.3" stroke-width="4"/>
+  <path d="M220 620 L220 320 A250 250 0 0 1 680 320 L680 620 Z"
+        fill="none" stroke="#f2e2bd" stroke-opacity="0.18" stroke-width="2"/>
+
+  <!-- eight point star -->
+  <g transform="translate(450,230)" fill="#f7e6bf" opacity="0.85">
+    <path d="M0,-34 L7,-7 L34,0 L7,7 L0,34 L-7,7 L-34,0 L-7,-7 Z"/>
+  </g>
+
+  <!-- steps -->
+  <g fill="#171933" opacity="0.5">
+    <rect x="0" y="560" width="900" height="60"/>
+    <rect x="60" y="520" width="780" height="40"/>
+    <rect x="120" y="480" width="660" height="40"/>
+  </g>
+
+  <!-- flanking columns -->
+  <g fill="#171933" opacity="0.55">
+    <rect x="90" y="260" width="34" height="300"/>
+    <rect x="70" y="240" width="74" height="20"/>
+    <rect x="776" y="260" width="34" height="300"/>
+    <rect x="756" y="240" width="74" height="20"/>
+  </g>
+
+  <!-- scattered stars -->
+  <g fill="#f7e6bf" opacity="0.65">
+    <g id="starSm2">
+      <path d="M0,-6 L1.6,-1.6 L6,0 L1.6,1.6 L0,6 L-1.6,1.6 L-6,0 L-1.6,-1.6 Z"/>
+    </g>
+    <use href="#starSm2" transform="translate(120,140) scale(1.1)"/>
+    <use href="#starSm2" transform="translate(760,110) scale(0.9)"/>
+    <use href="#starSm2" transform="translate(650,60) scale(0.7)"/>
+    <use href="#starSm2" transform="translate(260,70) scale(0.8)"/>
+  </g>
+
+  <rect width="900" height="620" filter="url(#grain2)" opacity="0.5"/>
+</svg>
