@@ -172,9 +172,9 @@ a:hover { border-color: var(--ink); }
 .intro p {
   margin: 0;
   font-weight: 500;
-  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
-  line-height: 1.6;
-  max-width: 62ch;
+  font-size: clamp(1.3rem, 2.1vw, 1.85rem);
+  line-height: 1.5;
+  max-width: 78ch;
 }
 
 /* Rules */
@@ -204,12 +204,33 @@ a:hover { border-color: var(--ink); }
   }
 }
 
+/* .contact-heading toggles between two states via script.js:
+   - default: position: sticky, top: 0 -- once scrolled within reach
+     of the top it "locks into place" there (see the reference image)
+     and native sticky behavior keeps it locked for the rest of the
+     column, releasing again automatically on the way back up.
+   - .is-pinned: position: fixed at the top-left of the viewport, used
+     only in the early phase (scrolling through the hero/intro) before
+     the natural position has scrolled within reach of the top -- native
+     sticky can't do this part alone, since it only engages once its
+     own natural flow position would cross the top offset.
+   Both states share the same padding/left/gradient so the handoff
+   between them is a pixel-for-pixel match with no visible jump.
+   .contact-heading-slot always reserves the natural rendered height
+   (set by script.js) so nothing else in the column jumps when the
+   heading switches to position: fixed. */
+
+.contact-heading-slot {
+  display: flow-root;
+}
+
 .contact-heading {
   position: sticky;
   top: 0;
-  z-index: 120;
+  left: var(--pad);
   padding: 24px 0 20px;
   margin: 0 0 24px;
+  z-index: 120;
   background: linear-gradient(
     to bottom,
     var(--bg) 0%,
@@ -218,42 +239,51 @@ a:hover { border-color: var(--ink); }
   );
 }
 
+.contact-heading.is-pinned {
+  position: fixed;
+  margin: 0;
+}
+
+.contact-heading.measuring {
+  position: static !important;
+}
+
 .contact-heading__text {
   display: inline-block;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 1.4rem;
-  padding-bottom: 10px;
+  font-size: 2.2rem;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
 
 .eyebrow {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 2.2rem;
   font-weight: 500;
 }
 
 .name {
-  margin: 0 0 28px;
+  margin: 0 0 32px;
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 2.2rem;
   font-weight: 600;
 }
 
 .contact {
-  margin: 0 0 44px;
-  font-size: 1.05rem;
+  margin: 0 0 48px;
+  font-size: 1.8rem;
   font-weight: 500;
-  line-height: 1.8;
+  line-height: 1.7;
 }
 
 .section-title {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 1.4rem;
-  padding-bottom: 12px;
+  font-size: 2.2rem;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -261,7 +291,7 @@ a:hover { border-color: var(--ink); }
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 0.95rem;
+  font-size: 1.3rem;
   font-weight: 500;
   line-height: 2;
   color: var(--ink);
@@ -280,8 +310,8 @@ a:hover { border-color: var(--ink); }
 .blurb {
   margin: 0;
   font-weight: 500;
-  font-size: 1.05rem;
-  line-height: 1.6;
+  font-size: clamp(1.3rem, 2.1vw, 1.85rem);
+  line-height: 1.5;
 }
 
 /* Footer */
