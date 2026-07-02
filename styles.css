@@ -3,10 +3,15 @@
   --ink: #171b34;
   --ink-soft: #171b3499;
   --line: #171b3440;
-  --font-wordmark: 'Italiana', 'Times New Roman', serif;
-  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
-  --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  --measure: 1000px;
+  --line-strong: #171b3466;
+
+  /* Placeholder stacks only -- swap for licensed typefaces later. */
+  --font-wordmark: Georgia, 'Times New Roman', serif;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: Helvetica, Arial, sans-serif;
+
+  --pad: clamp(20px, 2.6vw, 48px);
+  --nav-h: 84px;
 }
 
 * { box-sizing: border-box; }
@@ -21,8 +26,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-img { max-width: 100%; display: block; }
-
 a {
   color: inherit;
   text-decoration: none;
@@ -30,28 +33,107 @@ a {
 }
 a:hover { border-color: var(--ink); }
 
+/* Fixed nav: hidden at the very top of the page, fades in on scroll and
+   masks scrolling content that passes beneath it. */
+
+.fixed-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) 52%,
+    rgba(245, 243, 238, 0) 100%
+  );
+}
+
+.fixed-nav.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fixed-nav::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+}
+
+.fixed-nav__contact {
+  position: absolute;
+  left: var(--pad);
+  top: 0;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  border-bottom: none;
+}
+
+.fixed-nav .mark-placeholder--nav {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% - 8px));
+}
+
+/* Placeholder boxes -- stand in for the logomark and photography.
+   Swap these for real assets; sizing/position is what matters here. */
+
+.mark-placeholder {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 4px;
+}
+
+.image-placeholder {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--line-strong);
+  background: repeating-linear-gradient(
+    135deg,
+    #eae7e0,
+    #eae7e0 12px,
+    #e0dcd3 12px,
+    #e0dcd3 24px
+  );
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 /* Header */
 
 .site-header {
-  max-width: var(--measure);
+  max-width: 1920px;
   margin: 0 auto;
-  padding: clamp(48px, 8vw, 96px) 24px clamp(32px, 6vw, 64px);
+  padding: clamp(56px, 16vw, 220px) var(--pad) clamp(28px, 4vw, 56px);
   text-align: center;
-}
-
-.mark {
-  width: 34px;
-  height: 34px;
-  color: var(--ink);
-  margin: 0 auto 20px;
 }
 
 .wordmark {
   margin: 0;
   font-family: var(--font-wordmark);
   font-weight: 400;
-  letter-spacing: 0.08em;
-  font-size: clamp(2.6rem, 7vw, 5rem);
+  letter-spacing: 0.02em;
+  font-size: clamp(2.8rem, 12vw, 9rem);
   line-height: 1;
 }
 
@@ -59,29 +141,28 @@ a:hover { border-color: var(--ink); }
 
 .hero {
   position: relative;
-  max-width: var(--measure);
+  max-width: 1920px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--pad);
 }
 
 .hero__img {
   width: 100%;
   height: clamp(280px, 42vw, 460px);
-  object-fit: cover;
 }
 
 .hero__scrim {
   position: absolute;
-  inset: 0 24px 0 24px;
+  inset: 0 var(--pad) 0 var(--pad);
   background: linear-gradient(180deg, rgba(23, 27, 52, 0) 45%, rgba(23, 27, 52, 0.55) 100%);
   pointer-events: none;
 }
 
 .hero__title {
   position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: clamp(20px, 4vw, 40px);
+  left: calc(var(--pad) + clamp(4px, 3vw, 24px));
+  right: calc(var(--pad) + clamp(4px, 3vw, 24px));
+  bottom: clamp(24px, 5vw, 40px);
   margin: 0;
   text-align: center;
   color: #f7f3e8;
@@ -96,9 +177,9 @@ a:hover { border-color: var(--ink); }
 /* Intro paragraph */
 
 .intro {
-  max-width: var(--measure);
+  max-width: 1920px;
   margin: 0 auto;
-  padding: clamp(28px, 5vw, 48px) 24px 0;
+  padding: clamp(28px, 5vw, 48px) var(--pad) 0;
 }
 
 .intro p {
@@ -123,9 +204,9 @@ a:hover { border-color: var(--ink); }
 /* Details grid */
 
 .details {
-  max-width: var(--measure);
+  max-width: 1920px;
   margin: 0 auto;
-  padding: clamp(40px, 6vw, 64px) 24px clamp(56px, 8vw, 96px);
+  padding: clamp(40px, 6vw, 64px) var(--pad) clamp(56px, 8vw, 96px);
   display: grid;
   grid-template-columns: 1fr;
   gap: 56px;
@@ -133,8 +214,8 @@ a:hover { border-color: var(--ink); }
 
 @media (min-width: 760px) {
   .details {
-    grid-template-columns: 1.1fr 1fr;
-    gap: 64px;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 5vw, 96px);
   }
 }
 
@@ -184,10 +265,7 @@ a:hover { border-color: var(--ink); }
 }
 
 .secondary-img {
-  width: 100%;
-  height: auto;
   aspect-ratio: 16 / 11;
-  object-fit: cover;
   margin-bottom: 24px;
 }
 
@@ -201,9 +279,9 @@ a:hover { border-color: var(--ink); }
 /* Footer */
 
 .site-footer {
-  max-width: var(--measure);
+  max-width: 1920px;
   margin: 0 auto;
-  padding: 0 24px clamp(32px, 5vw, 48px);
+  padding: 0 var(--pad) clamp(32px, 5vw, 48px);
 }
 
 .site-footer p {
