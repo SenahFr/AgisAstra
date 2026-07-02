@@ -75,22 +75,6 @@ a:hover { border-color: var(--ink); }
   transform: translate(-50%, calc(-50% - 8px));
 }
 
-/* "Contact" echo: shown early in the scroll (right after the hero),
-   hidden again once the real .contact-heading below has scrolled up
-   to the same spot and taken over as a native sticky element. */
-
-.fixed-nav__contact {
-  position: absolute;
-  left: var(--pad);
-  top: 24px;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.fixed-nav__contact.is-visible {
-  opacity: 1;
-}
-
 /* Placeholder boxes -- stand in for the logomark and photography.
    Swap these for real assets; sizing/position is what matters here. */
 
