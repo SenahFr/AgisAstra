@@ -10,11 +10,11 @@
 <body>
 
   <!-- Fixed nav: appears once the page scrolls past the header, with a
-       bottom rule and a gradient fade so content passes underneath it. -->
+       bottom rule and a gradient fade so content passes underneath it.
+       "Contact" itself is NOT here -- it's a single element further
+       down the page (see .contact-heading) that uses native CSS
+       position: sticky, so there is only ever one copy of it. -->
   <div class="fixed-nav" id="fixedNav">
-    <div class="fixed-nav__contact" id="fixedNavContact">
-      <span class="contact-heading__text">Contact</span>
-    </div>
     <div class="mark-placeholder mark-placeholder--nav" aria-hidden="true"></div>
   </div>
 
