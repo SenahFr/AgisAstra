@@ -242,6 +242,14 @@ a:hover { border-color: var(--ink); }
 .contact-heading.is-pinned {
   position: fixed;
   margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.contact-heading.is-pinned.is-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .contact-heading.measuring {
