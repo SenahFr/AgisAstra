@@ -33,8 +33,11 @@ function update() {
   // and holds it in place on its own -- including releasing correctly
   // if the page is scrolled back up past this threshold.
   const lockScrollY = naturalTop - PIN_TOP;
-  const shouldPin = y > EARLY_THRESHOLD && y < lockScrollY;
-  contactHeading.classList.toggle('is-pinned', shouldPin);
+  contactHeading.classList.toggle('is-pinned', y < lockScrollY);
+
+  // Pinned positioning kicks in immediately so there's no layout jump,
+  // but it fades in via opacity rather than popping in abruptly.
+  contactHeading.classList.toggle('is-visible', y > EARLY_THRESHOLD);
 }
 
 measure();
