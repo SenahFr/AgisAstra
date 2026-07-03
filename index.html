@@ -35,6 +35,17 @@
     <h1 class="wordmark">Aegis Astra</h1>
   </header>
 
+  <!-- Fixed-position stand-in for "Contact", shown only while scrolling
+       through the hero/intro before the real heading (down in the
+       details section, see #contactHeading) is close enough to take
+       over via its own native position: sticky. Kept as a separate
+       element rather than re-purposing the real one so the real
+       heading never has to leave its column's normal flow -- that's
+       what makes its sticky behavior reliable. -->
+  <div class="contact-early-bar" id="contactEarlyBar">
+    <span class="contact-heading__text">Contact</span>
+  </div>
+
   <main>
     <section class="hero">
       <div class="image-placeholder hero__img">
@@ -56,10 +67,12 @@
 
     <section class="details" id="contact">
       <div class="details__col">
-        <div class="contact-heading-slot" id="contactHeadingSlot">
-          <div class="contact-heading" id="contactHeading">
-            <span class="contact-heading__text">Contact</span>
-          </div>
+        <!-- Always in normal flow -- a zero-height marker used purely to
+             read a live, always-accurate "how far until Contact reaches
+             the top" measurement each scroll frame (see script.js). -->
+        <span class="contact-sentinel" id="contactSentinel"></span>
+        <div class="contact-heading" id="contactHeading">
+          <span class="contact-heading__text">Contact</span>
         </div>
 
         <p class="eyebrow">Custos Libri</p>
