@@ -224,21 +224,26 @@ a:hover { border-color: var(--ink); }
   }
 }
 
-/* .contact-heading toggles between two states via script.js, using the
-   same pure-JS position: fixed pattern as the logomark rather than
-   native CSS position: sticky -- sticky turned out not to engage
-   cleanly for this element inside the two-column grid (it kept
-   drifting with scroll instead of clamping to top: 0, even well past
-   where it should have stuck), which was the source of the jumpiness.
-   position: fixed driven by a JS scroll threshold is deterministic and
-   isn't bounded by a containing block, so it stays pinned once
-   triggered with no drift or gap.
+/* .contact-heading has three states, all driven by script.js via pure
+   JS-computed scroll thresholds rather than native CSS position:
+   sticky -- sticky turned out not to engage cleanly for this element
+   inside the two-column grid (it kept drifting with scroll instead of
+   clamping to top: 0, even well past where it should have stuck),
+   which was the source of the jumpiness. Both fixed states below are
+   deterministic and aren't bounded by a containing block, so there's
+   no drift or gap at either transition, unlike the sticky version.
    - default: position: static, normal in-column flow -- only visible
-     before the pin threshold, i.e. off-screen (below the fold) until
-     scrolled to.
-   - .is-pinned: fixed at the top of the viewport, triggered once
-     scrolling brings the natural position within reach of the top, and
-     stays pinned for the rest of the page (matching the logomark).
+     before the early threshold, i.e. off-screen (below the fold)
+     until scrolled to.
+   - .is-pinned: a full-width fixed bar, used while scrolling through
+     the hero/intro before the heading's natural position has scrolled
+     within reach of the top. Fades in via opacity rather than popping
+     in abruptly.
+   - .is-locked: once that natural position is reached, it switches to
+     a column-width fixed heading (matching the reference image, sitting
+     right above "Custos Libri") and stays there for the rest of the
+     column -- this is the "locks into place" moment. Width is set by
+     script.js to match the column's own rendered width.
    .contact-heading-slot always reserves the natural rendered height
    (set by script.js) so nothing else in the column jumps when the
    heading switches to position: fixed. */
@@ -263,6 +268,11 @@ a:hover { border-color: var(--ink); }
   align-items: center;
   padding: 0 0 0 var(--pad);
   margin: 0;
+  /* No background of its own: the logomark's fixed bar (z-index: 100,
+     below this element's z-index: 120) already provides a full-width
+     gradient backdrop that both share -- giving this its own opaque
+     background too would cover the mark icon whenever both are pinned
+     at once (they overlap for part of the scroll range). */
   background: none;
   opacity: 0;
   pointer-events: none;
@@ -272,6 +282,23 @@ a:hover { border-color: var(--ink); }
 .contact-heading.is-pinned.is-visible {
   opacity: 1;
   pointer-events: auto;
+}
+
+.contact-heading.is-locked {
+  position: fixed;
+  top: 0;
+  left: var(--pad);
+  /* width set inline by script.js to match the column's own rendered
+     width -- position: fixed doesn't inherit it from the parent the
+     way normal flow (or position: sticky) would. */
+  padding: 24px 0 20px;
+  margin: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) 70%,
+    rgba(245, 243, 238, 0) 100%
+  );
 }
 
 .contact-heading__text {
