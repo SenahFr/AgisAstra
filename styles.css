@@ -1,3 +1,30 @@
+@font-face {
+  font-family: 'Sinistre';
+  src: url('assets/fonts/Sinistre-Regular.woff2') format('woff2'),
+       url('assets/fonts/Sinistre-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sinistre';
+  src: url('assets/fonts/Sinistre-Bold.woff2') format('woff2'),
+       url('assets/fonts/Sinistre-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sinistre';
+  src: url('assets/fonts/Sinistre-Dark.woff2') format('woff2'),
+       url('assets/fonts/Sinistre-Dark.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #f5f3ee;
   --ink: #171b34;
@@ -5,7 +32,7 @@
   --line: #171b3440;
   --line-strong: #171b3466;
 
-  --font-wordmark: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-wordmark: 'Sinistre', Georgia, 'Times New Roman', serif;
   --font-display: Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', Helvetica, Arial, sans-serif;
 
@@ -111,7 +138,7 @@ a:hover { border-color: var(--ink); }
 .wordmark {
   margin: 0;
   font-family: var(--font-wordmark);
-  font-weight: 500;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.01em;
   font-size: clamp(2.8rem, 12vw, 9rem);
