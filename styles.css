@@ -263,10 +263,10 @@ a:hover { border-color: var(--ink); }
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  padding: 0 0 0 var(--pad);
+  /* Padding matches .is-locked exactly (not centered in an 80px bar) so
+     the handoff between the two fixed states is a pixel-identical swap
+     with zero vertical jump, even without the scroll hysteresis below. */
+  padding: 24px 0 20px var(--pad);
   margin: 0;
   /* No background of its own: the logomark's fixed bar (z-index: 100,
      below this element's z-index: 120) already provides a full-width
