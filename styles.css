@@ -50,7 +50,7 @@ a:hover { border-color: var(--ink); }
   top: 0;
   left: 0;
   right: 0;
-  z-index: 120;
+  z-index: 130;
   margin-bottom: 0;
   background: linear-gradient(
     to bottom,
