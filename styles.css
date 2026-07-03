@@ -224,48 +224,54 @@ a:hover { border-color: var(--ink); }
   }
 }
 
-/* .contact-heading has three states, all driven by script.js via pure
-   JS-computed scroll thresholds rather than native CSS position:
-   sticky -- sticky turned out not to engage cleanly for this element
-   inside the two-column grid (it kept drifting with scroll instead of
-   clamping to top: 0, even well past where it should have stuck),
-   which was the source of the jumpiness. Both fixed states below are
-   deterministic and aren't bounded by a containing block, so there's
-   no drift or gap at either transition, unlike the sticky version.
-   - default: position: static, normal in-column flow -- only visible
-     before the early threshold, i.e. off-screen (below the fold)
-     until scrolled to.
-   - .is-pinned: a full-width fixed bar, used while scrolling through
-     the hero/intro before the heading's natural position has scrolled
-     within reach of the top. Fades in via opacity rather than popping
-     in abruptly.
-   - .is-locked: once that natural position is reached, it switches to
-     a column-width fixed heading (matching the reference image, sitting
-     right above "Custos Libri") and stays there for the rest of the
-     column -- this is the "locks into place" moment. Width is set by
-     script.js to match the column's own rendered width.
-   .contact-heading-slot always reserves the natural rendered height
-   (set by script.js) so nothing else in the column jumps when the
-   heading switches to position: fixed. */
+/* The real "Contact" heading is a direct child of .details__col (not
+   wrapped in a height-constrained placeholder) and just uses native
+   position: sticky -- that needs a tall containing block to have any
+   room to stick within, which is exactly what the column (as tall as
+   the whole Services list / secondary image) provides. Sticky is
+   browser-native and continuously synced with actual scroll/layout, so
+   it can't drift, go stale, or fail to engage the way a JS-computed
+   scroll-threshold + position: fixed emulation could.
+   .contact-sentinel is a zero-height marker placed immediately before
+   it, always in normal flow, used only so script.js can read a live
+   "how much further until this reaches the top" distance every scroll
+   frame (see the early bar below) without caching a measurement that a
+   later web-font swap could invalidate. */
 
-.contact-heading-slot {
-  display: flow-root;
+.contact-sentinel {
+  display: block;
+  height: 0;
 }
 
 .contact-heading {
+  position: sticky;
+  top: 0;
+  z-index: 120;
   padding: 24px 0 20px;
   margin: 0 0 24px;
-  z-index: 120;
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) 70%,
+    rgba(245, 245, 245, 0) 100%
+  );
 }
 
-.contact-heading.is-pinned {
+/* .contact-early-bar is a separate, always-fixed duplicate shown only
+   while scrolling through the hero/intro, before the real heading
+   above is close enough to the top for its own sticky position to
+   have taken over -- sticky can't make an element appear before its
+   own place in the document is reached, so this covers that gap.
+   Padding/left offset are identical to .contact-heading's so the
+   moment this fades out, what's left behind lines up exactly with the
+   real (already correctly positioned) element -- no jump. */
+
+.contact-early-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  /* Padding matches .is-locked exactly (not centered in an 80px bar) so
-     the handoff between the two fixed states is a pixel-identical swap
-     with zero vertical jump, even without the scroll hysteresis below. */
+  z-index: 120;
   padding: 24px 0 20px var(--pad);
   margin: 0;
   /* No background of its own: the logomark's fixed bar (z-index: 100,
@@ -279,26 +285,9 @@ a:hover { border-color: var(--ink); }
   transition: opacity 0.35s ease;
 }
 
-.contact-heading.is-pinned.is-visible {
+.contact-early-bar.is-visible {
   opacity: 1;
   pointer-events: auto;
-}
-
-.contact-heading.is-locked {
-  position: fixed;
-  top: 0;
-  left: var(--pad);
-  /* width set inline by script.js to match the column's own rendered
-     width -- position: fixed doesn't inherit it from the parent the
-     way normal flow (or position: sticky) would. */
-  padding: 24px 0 20px;
-  margin: 0;
-  background: linear-gradient(
-    to bottom,
-    var(--bg) 0%,
-    var(--bg) 70%,
-    rgba(245, 245, 245, 0) 100%
-  );
 }
 
 .contact-heading__text {
