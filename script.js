@@ -7,6 +7,8 @@ const markBar = document.getElementById('markBar');
 const EARLY_THRESHOLD = 24; // scroll past this before "Contact" appears pinned
 const HYSTERESIS = 16; // px of scroll buffer at each boundary before it can flip back
 
+const FADE_MS = 350; // duration of the "Contact" fade-in/out, driven by real elapsed time (see below)
+
 let markNaturalTop = 0; // document-relative Y of the logomark's natural (centered) position
 
 // Latched state, not recomputed from scratch every frame: without a
@@ -17,6 +19,44 @@ let markNaturalTop = 0; // document-relative Y of the logomark's natural (center
 let isLocked = false;
 let isVisible = false;
 let markIsPinned = false;
+
+// The fade is animated by hand, over real elapsed time via
+// requestAnimationFrame, rather than a CSS transition triggered by a
+// class toggle. A CSS transition only animates if the browser gets to
+// paint the "before" state (opacity: 0) at least once before the
+// "after" class is applied -- but a single ordinary scroll input (a
+// mouse-wheel notch or trackpad tick is very often 40-100+px) can push
+// scrollY past both the "start pinning" and "EARLY_THRESHOLD" marks in
+// the same scroll event, so is-pinned and is-visible would both get
+// added in the same synchronous update() call with no frame in
+// between -- opacity jumps straight to 1 with nothing to fade from.
+// Driving it by elapsed time instead guarantees a real multi-frame
+// fade regardless of how big any single scroll step was.
+let fadeTarget = 0;
+let fadeCurrent = 0;
+let fadeStartValue = 0;
+let fadeStartTime = 0;
+let fadeRafId = null;
+
+function setFadeTarget(target) {
+  if (target === fadeTarget) return;
+  fadeTarget = target;
+  fadeStartValue = fadeCurrent;
+  fadeStartTime = performance.now();
+  if (fadeRafId === null) fadeRafId = requestAnimationFrame(stepFade);
+}
+
+function stepFade(now) {
+  const t = Math.min(1, (now - fadeStartTime) / FADE_MS);
+  fadeCurrent = fadeStartValue + (fadeTarget - fadeStartValue) * t;
+  contactHeading.style.opacity = fadeCurrent;
+  contactHeading.style.pointerEvents = fadeCurrent > 0.05 ? 'auto' : 'none';
+  if (t < 1) {
+    fadeRafId = requestAnimationFrame(stepFade);
+  } else {
+    fadeRafId = null;
+  }
+}
 
 // One-time (+resize) layout measurements: how tall the slot needs to
 // be to reserve Contact's natural space in the column, and how wide
@@ -66,8 +106,26 @@ function update() {
   const shouldPin = y > 0 && !isLocked;
 
   contactHeading.classList.toggle('is-pinned', shouldPin);
-  contactHeading.classList.toggle('is-visible', isVisible && shouldPin);
   contactHeading.classList.toggle('is-locked', isLocked);
+
+  if (isLocked) {
+    // Once locked it's simply always fully visible -- no fade needed,
+    // and nothing left to animate away from. Set (not clear) the
+    // inline style explicitly: if this later un-locks back to
+    // is-pinned, that class's CSS fallback is opacity: 0, and this
+    // inline value needs to already say 1 so it doesn't flash empty
+    // for a frame before the fade logic below catches up.
+    fadeTarget = 1;
+    fadeCurrent = 1;
+    if (fadeRafId !== null) {
+      cancelAnimationFrame(fadeRafId);
+      fadeRafId = null;
+    }
+    contactHeading.style.opacity = 1;
+    contactHeading.style.pointerEvents = 'auto';
+  } else {
+    setFadeTarget(shouldPin && isVisible ? 1 : 0);
+  }
 
   // Logomark: pins to the top once scrolling brings its natural
   // (centered-in-header) position within reach of the top, and stays
