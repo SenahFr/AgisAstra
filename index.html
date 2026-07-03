@@ -12,27 +12,25 @@
 </head>
 <body>
 
-  <!-- Fixed nav: appears once the page scrolls past the header, with a
-       bottom rule and a gradient fade so content passes underneath it.
-       "Contact" itself is NOT here -- it's a single element further
-       down the page (see .contact-heading) that uses native CSS
-       position: sticky, so there is only ever one copy of it. -->
-  <div class="fixed-nav" id="fixedNav">
-    <svg class="mark mark--nav" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M14 10 C20 16 22 20 20 26 C18 32 10 34 8 40"/>
-      <path d="M20 26 C26 28 32 34 30 42 C28 48 20 50 16 56"/>
-      <circle cx="15" cy="8" r="2.6" fill="currentColor" stroke="none"/>
-      <path d="M46 12 L48.4 18.6 L55 20 L48.4 21.4 L46 28 L43.6 21.4 L37 20 L43.6 18.6 Z" fill="currentColor" stroke="none"/>
-    </svg>
-  </div>
-
   <header class="site-header">
-    <svg class="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M14 10 C20 16 22 20 20 26 C18 32 10 34 8 40"/>
-      <path d="M20 26 C26 28 32 34 30 42 C28 48 20 50 16 56"/>
-      <circle cx="15" cy="8" r="2.6" fill="currentColor" stroke="none"/>
-      <path d="M46 12 L48.4 18.6 L55 20 L48.4 21.4 L46 28 L43.6 21.4 L37 20 L43.6 18.6 Z" fill="currentColor" stroke="none"/>
-    </svg>
+    <!-- .mark-bar sits centered in the full-height header at page load
+         (natural position, with room above it -- matching the
+         reference). Once scrolling brings that natural position to
+         the top of the viewport, script.js pins it there (position:
+         fixed) for the rest of the page, and un-pins it again if
+         scrolled back up -- see the same pattern used for #contact.
+         .mark-bar-slot reserves its rendered height so nothing jumps
+         when it's removed from flow. -->
+    <div class="mark-bar-slot" id="markBarSlot">
+      <div class="mark-bar" id="markBar">
+        <svg class="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 10 C20 16 22 20 20 26 C18 32 10 34 8 40"/>
+          <path d="M20 26 C26 28 32 34 30 42 C28 48 20 50 16 56"/>
+          <circle cx="15" cy="8" r="2.6" fill="currentColor" stroke="none"/>
+          <path d="M46 12 L48.4 18.6 L55 20 L48.4 21.4 L46 28 L43.6 21.4 L37 20 L43.6 18.6 Z" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+    </div>
     <h1 class="wordmark">Aegis Astra</h1>
   </header>
 

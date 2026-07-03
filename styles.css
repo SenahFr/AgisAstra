@@ -31,54 +31,49 @@ a {
 }
 a:hover { border-color: var(--ink); }
 
-/* Fixed nav: hidden at the very top of the page, fades in on scroll and
-   masks scrolling content that passes beneath it. */
+/* .mark-bar: sits at its natural position (centered in the header,
+   above the wordmark) until script.js pins it -- position: fixed
+   can't be scoped by a containing block the way sticky can, so once
+   pinned it stays pinned for the rest of the page regardless of
+   length, and script.js un-pins it if scrolled back above that point. */
 
-.fixed-nav {
+.mark-bar {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.mark-bar.is-pinned {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 140px;
-  z-index: 100;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s ease;
+  z-index: 120;
+  margin-bottom: 0;
   background: linear-gradient(
     to bottom,
     var(--bg) 0%,
-    var(--bg) 52%,
+    var(--bg) 70%,
     rgba(245, 243, 238, 0) 100%
   );
 }
 
-.fixed-nav.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.fixed-nav::before {
+.mark-bar.is-pinned::after {
   content: "";
   position: absolute;
-  top: 0;
   left: 0;
   right: 0;
+  bottom: 0;
   height: 1px;
   background: var(--line);
-}
-
-.fixed-nav .mark--nav {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, calc(-50% - 8px));
 }
 
 .mark {
   display: block;
   width: 40px;
   height: 40px;
-  margin: 0 auto 24px;
   color: var(--ink);
 }
 
@@ -117,6 +112,10 @@ a:hover { border-color: var(--ink); }
   justify-content: center;
   padding: 48px var(--pad);
   text-align: center;
+}
+
+.mark-bar-slot {
+  display: flow-root;
 }
 
 .wordmark {
