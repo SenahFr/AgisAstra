@@ -69,7 +69,7 @@ function measure() {
   contactHeading.classList.remove(...prevClasses);
   const rect = contactHeadingSlot.getBoundingClientRect();
   contactHeadingSlot.style.height = rect.height + 'px';
-  contactHeading.style.width = rect.width + 'px';
+  contactHeading.style.setProperty('--locked-width', rect.width + 'px');
   contactHeading.classList.add(...prevClasses);
 
   const prevMarkClasses = [...markBar.classList].filter((c) => c !== 'mark-bar');
