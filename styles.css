@@ -89,9 +89,8 @@ a:hover { border-color: var(--ink); }
 
 .mark {
   display: block;
-  width: 40px;
+  width: auto;
   height: 40px;
-  color: var(--ink);
 }
 
 /* Placeholder boxes -- stand in for photography (the logomark above is
