@@ -60,16 +60,6 @@ a:hover { border-color: var(--ink); }
   );
 }
 
-.mark-bar.is-pinned::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--line);
-}
-
 .mark {
   display: block;
   width: 40px;
