@@ -33,8 +33,8 @@
   --line-strong: #171b3466;
 
   --font-wordmark: 'Sinistre', Georgia, 'Times New Roman', serif;
-  --font-display: Georgia, 'Times New Roman', serif;
-  --font-body: 'Inter', Helvetica, Arial, sans-serif;
+  --font-display: 'aktiv-grotesk', 'Inter', Helvetica, Arial, sans-serif;
+  --font-body: 'aktiv-grotesk', 'Inter', Helvetica, Arial, sans-serif;
 
   --pad: clamp(20px, 2.6vw, 48px);
 }
@@ -137,7 +137,7 @@ a:hover { border-color: var(--ink); }
 .wordmark {
   margin: 0;
   font-family: var(--font-wordmark);
-  font-weight: 700;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.01em;
   font-size: clamp(2.8rem, 12vw, 9rem);
@@ -174,7 +174,7 @@ a:hover { border-color: var(--ink); }
   text-align: center;
   color: #f7f3e8;
   font-family: var(--font-body);
-  font-weight: 700;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   font-size: clamp(1.05rem, 3vw, 1.9rem);
@@ -191,7 +191,7 @@ a:hover { border-color: var(--ink); }
 
 .intro p {
   margin: 0;
-  font-weight: 500;
+  font-weight: 400;
   font-size: clamp(1.3rem, 2.1vw, 1.85rem);
   line-height: 1.5;
   max-width: 78ch;
@@ -286,7 +286,7 @@ a:hover { border-color: var(--ink); }
 .contact-heading__text {
   display: inline-block;
   font-family: var(--font-body);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 2.2rem;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
@@ -296,27 +296,27 @@ a:hover { border-color: var(--ink); }
   margin: 0 0 4px;
   font-family: var(--font-display);
   font-size: 2.2rem;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .name {
   margin: 0 0 32px;
   font-family: var(--font-display);
   font-size: 2.2rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .contact {
   margin: 0 0 48px;
   font-size: 1.8rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.7;
 }
 
 .section-title {
   margin: 0 0 16px;
   font-family: var(--font-body);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 2.2rem;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
@@ -327,7 +327,7 @@ a:hover { border-color: var(--ink); }
   padding: 0;
   list-style: none;
   font-size: 1.3rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 2;
   color: var(--ink);
 }
@@ -344,7 +344,7 @@ a:hover { border-color: var(--ink); }
 
 .blurb {
   margin: 0;
-  font-weight: 500;
+  font-weight: 400;
   font-size: clamp(1.3rem, 2.1vw, 1.85rem);
   line-height: 1.5;
 }
