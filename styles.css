@@ -155,7 +155,7 @@ a:hover { border-color: var(--ink); }
 
 .hero__img {
   width: 100%;
-  aspect-ratio: 745 / 333;
+  aspect-ratio: 745 / 299.7;
 }
 
 .hero__scrim {
