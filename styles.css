@@ -235,6 +235,9 @@ a:hover { border-color: var(--ink); }
 
 .contact-heading.is-pinned {
   position: fixed;
+  left: 0;
+  right: 0;
+  padding-left: var(--pad);
   margin: 0;
   opacity: 0;
   pointer-events: none;
