@@ -264,7 +264,13 @@ a:hover { border-color: var(--ink); }
    own place in the document is reached, so this covers that gap.
    Padding/left offset are identical to .contact-heading's so the
    moment this fades out, what's left behind lines up exactly with the
-   real (already correctly positioned) element -- no jump. */
+   real (already correctly positioned) element -- no jump.
+   Opacity is set directly by script.js as a function of scroll
+   position every frame (not a CSS transition) so the fade-out is
+   guaranteed to finish before the real heading can possibly be
+   visible on screen, regardless of how fast the user scrolls -- a
+   fixed-duration transition can't promise that; a fast scroll can
+   outrun it and land both on screen at once. */
 
 .contact-early-bar {
   position: fixed;
@@ -282,12 +288,6 @@ a:hover { border-color: var(--ink); }
   background: none;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.35s ease;
-}
-
-.contact-early-bar.is-visible {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .contact-heading__text {
