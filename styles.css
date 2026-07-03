@@ -224,18 +224,21 @@ a:hover { border-color: var(--ink); }
   }
 }
 
-/* .contact-heading toggles between two states via script.js:
-   - default: position: sticky, top: 0 -- once scrolled within reach
-     of the top it "locks into place" there (see the reference image)
-     and native sticky behavior keeps it locked for the rest of the
-     column, releasing again automatically on the way back up.
-   - .is-pinned: position: fixed at the top-left of the viewport, used
-     only in the early phase (scrolling through the hero/intro) before
-     the natural position has scrolled within reach of the top -- native
-     sticky can't do this part alone, since it only engages once its
-     own natural flow position would cross the top offset.
-   Both states share the same padding/left/gradient so the handoff
-   between them is a pixel-for-pixel match with no visible jump.
+/* .contact-heading toggles between two states via script.js, using the
+   same pure-JS position: fixed pattern as the logomark rather than
+   native CSS position: sticky -- sticky turned out not to engage
+   cleanly for this element inside the two-column grid (it kept
+   drifting with scroll instead of clamping to top: 0, even well past
+   where it should have stuck), which was the source of the jumpiness.
+   position: fixed driven by a JS scroll threshold is deterministic and
+   isn't bounded by a containing block, so it stays pinned once
+   triggered with no drift or gap.
+   - default: position: static, normal in-column flow -- only visible
+     before the pin threshold, i.e. off-screen (below the fold) until
+     scrolled to.
+   - .is-pinned: fixed at the top of the viewport, triggered once
+     scrolling brings the natural position within reach of the top, and
+     stays pinned for the rest of the page (matching the logomark).
    .contact-heading-slot always reserves the natural rendered height
    (set by script.js) so nothing else in the column jumps when the
    heading switches to position: fixed. */
@@ -245,22 +248,14 @@ a:hover { border-color: var(--ink); }
 }
 
 .contact-heading {
-  position: sticky;
-  top: 0;
-  left: var(--pad);
   padding: 24px 0 20px;
   margin: 0 0 24px;
   z-index: 120;
-  background: linear-gradient(
-    to bottom,
-    var(--bg) 0%,
-    var(--bg) 70%,
-    rgba(245, 243, 238, 0) 100%
-  );
 }
 
 .contact-heading.is-pinned {
   position: fixed;
+  top: 0;
   left: 0;
   right: 0;
   height: 80px;
@@ -277,10 +272,6 @@ a:hover { border-color: var(--ink); }
 .contact-heading.is-pinned.is-visible {
   opacity: 1;
   pointer-events: auto;
-}
-
-.contact-heading.measuring {
-  position: static !important;
 }
 
 .contact-heading__text {

@@ -4,9 +4,7 @@ const markBarSlot = document.getElementById('markBarSlot');
 const markBar = document.getElementById('markBar');
 
 const EARLY_THRESHOLD = 24; // scroll past this before "Contact" appears pinned
-const PIN_TOP = 24; // px from the top of the viewport when pinned/locked
 
-let naturalTop = 0; // document-relative Y of the Contact heading's designed (locked) position
 let markNaturalTop = 0; // document-relative Y of the logomark's natural (centered) position
 
 // Measures where an element naturally sits in the page (forcing it out
@@ -25,21 +23,22 @@ function measure(slot, el) {
 }
 
 function measureAll() {
-  naturalTop = measure(contactSlot, contactHeading);
+  measure(contactSlot, contactHeading); // just locks the slot height
   markNaturalTop = measure(markBarSlot, markBar);
 }
 
 function update() {
   const y = window.scrollY;
 
-  // Contact: below this scroll position, native sticky hasn't engaged
-  // yet (its natural position is still below the top offset), so we
-  // force it fixed at the top-left instead. At and beyond this point,
-  // native position: sticky (its default state) takes over and holds
-  // it in place on its own -- including releasing correctly if the
-  // page is scrolled back up past this threshold.
-  const lockScrollY = naturalTop - PIN_TOP;
-  contactHeading.classList.toggle('is-pinned', y < lockScrollY);
+  // Contact: pins to the top of the viewport past the early threshold
+  // and stays pinned for the rest of the page -- same pure-JS
+  // position: fixed pattern as the logomark below, rather than handing
+  // off to native position: sticky. Sticky turned out not to engage
+  // reliably for this element inside the two-column grid (it kept
+  // drifting with scroll instead of clamping to top: 0), which is what
+  // caused the jumpiness; a JS scroll-threshold driving position:
+  // fixed is deterministic and has no such gap.
+  contactHeading.classList.toggle('is-pinned', y > EARLY_THRESHOLD);
 
   // Pinned positioning kicks in immediately so there's no layout jump,
   // but it fades in via opacity rather than popping in abruptly.
