@@ -273,14 +273,16 @@ a:hover { border-color: var(--ink); }
      background too would cover the mark icon whenever both are pinned
      at once (they overlap for part of the scroll range). */
   background: none;
+  /* Opacity/pointer-events while pinned are set directly by script.js,
+     animated over real elapsed time frame by frame -- not a CSS
+     transition. A transition only animates if the browser paints the
+     "before" value at least once first, but a single ordinary scroll
+     step can jump straight past the point where this fade should
+     start, leaving no frame to transition from. opacity: 0 here is
+     just the pre-JS fallback so it can't flash visible before the
+     first scroll handler run. */
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.35s ease;
-}
-
-.contact-heading.is-pinned.is-visible {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .contact-heading.is-locked {
