@@ -3,6 +3,7 @@ const contactSentinel = document.getElementById('contactSentinel');
 const contactHeading = document.getElementById('contactHeading');
 const markBarSlot = document.getElementById('markBarSlot');
 const markBar = document.getElementById('markBar');
+const mark = document.getElementById('mark');
 
 const EARLY_THRESHOLD = 24; // scroll past this before "Contact" appears pinned
 const HYSTERESIS = 16; // px of scroll buffer at each boundary before it can flip back
@@ -150,3 +151,55 @@ window.addEventListener('resize', () => {
   measure();
   update();
 });
+
+// Mark run-cycle sprite: steps through frames while the page is
+// scrolling, driven by a fixed-interval timer rather than the scroll
+// event itself (scroll events fire far faster than a legible run-cycle
+// frame rate). Once scrolling stops, rather than snapping back to
+// frame 0, it keeps stepping forward at the same rate -- finishing
+// out the current stride -- until it naturally lands on frame 0, then
+// stops there. That "settle" behavior is what makes the return look
+// smooth instead of jumpy.
+const MARK_FRAME_COUNT = 9;
+const MARK_FRAME_WIDTH = 36; // must match .mark's width/background-size in styles.css
+const MARK_FRAME_MS = 80; // playback speed while animating
+const MARK_SCROLL_IDLE_MS = 150; // how long without a scroll event before "stopped"
+
+let markFrame = 0;
+let markTimer = null;
+let markSettling = false;
+let markIdleTimer = null;
+
+function setMarkFrame(i) {
+  markFrame = ((i % MARK_FRAME_COUNT) + MARK_FRAME_COUNT) % MARK_FRAME_COUNT;
+  mark.style.backgroundPositionX = -(markFrame * MARK_FRAME_WIDTH) + 'px';
+}
+
+function stepMarkFrame() {
+  const next = markFrame + 1;
+  if (markSettling && next % MARK_FRAME_COUNT === 0) {
+    setMarkFrame(0);
+    clearInterval(markTimer);
+    markTimer = null;
+    markSettling = false;
+    return;
+  }
+  setMarkFrame(next);
+}
+
+function onScrollForMark() {
+  markSettling = false;
+  if (markTimer === null) markTimer = setInterval(stepMarkFrame, MARK_FRAME_MS);
+
+  clearTimeout(markIdleTimer);
+  markIdleTimer = setTimeout(() => {
+    if (markFrame === 0) {
+      clearInterval(markTimer);
+      markTimer = null;
+      return;
+    }
+    markSettling = true;
+  }, MARK_SCROLL_IDLE_MS);
+}
+
+window.addEventListener('scroll', onScrollForMark, { passive: true });

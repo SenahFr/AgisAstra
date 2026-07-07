@@ -87,10 +87,21 @@ a:hover { border-color: var(--ink); }
   );
 }
 
+/* .mark shows one frame of a 9-frame running-cycle sprite sheet
+   (351x450px per frame) via background-position, stepped by
+   script.js -- see MARK_FRAME_WIDTH there. Sized to match the
+   previous static mark.png's rendered proportions exactly (same
+   height, same aspect ratio) so swapping to the sprite caused no
+   layout shift. */
+
 .mark {
   display: block;
-  width: auto;
+  width: 36px;
   height: 46px;
+  background-image: url('assets/logo/mark-run-sprite.webp');
+  background-repeat: no-repeat;
+  background-size: 324px 46px;
+  background-position: 0 0;
 }
 
 /* Placeholder boxes -- stand in for photography (the logomark above is
