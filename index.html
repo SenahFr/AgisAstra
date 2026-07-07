@@ -29,7 +29,11 @@
          when it's removed from flow. -->
     <div class="mark-bar-slot" id="markBarSlot">
       <div class="mark-bar" id="markBar">
-        <img class="mark" src="assets/logo/mark.png" alt="Aegis Astra">
+        <!-- A 9-frame running-cycle sprite (assets/logo/mark-run-sprite.png),
+             stepped by script.js: cycles while the page is scrolling and
+             continues forward smoothly (never jumps) until it lands back
+             on frame 0 shortly after scrolling stops. -->
+        <div class="mark" id="mark" role="img" aria-label="Aegis Astra"></div>
       </div>
     </div>
     <h1 class="wordmark">Aegis Astra</h1>
