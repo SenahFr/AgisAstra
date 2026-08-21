@@ -87,8 +87,8 @@ a:hover { border-color: var(--ink); }
   );
 }
 
-/* .mark shows one frame of a 9-frame running-cycle sprite sheet
-   (351x450px per frame) via background-position, stepped by
+/* .mark shows one frame of a 14-frame running-cycle sprite sheet
+   (347x450px per frame) via background-position, stepped by
    script.js -- see MARK_FRAME_WIDTH there. Sized to match the
    previous static mark.png's rendered proportions exactly (same
    height, same aspect ratio) so swapping to the sprite caused no
@@ -96,11 +96,11 @@ a:hover { border-color: var(--ink); }
 
 .mark {
   display: block;
-  width: 36px;
+  width: 35px;
   height: 46px;
   background-image: url('assets/logo/mark-run-sprite.webp');
   background-repeat: no-repeat;
-  background-size: 324px 46px;
+  background-size: 490px 46px;
   background-position: 0 0;
 }
 

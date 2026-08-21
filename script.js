@@ -160,8 +160,8 @@ window.addEventListener('resize', () => {
 // out the current stride -- until it naturally lands on frame 0, then
 // stops there. That "settle" behavior is what makes the return look
 // smooth instead of jumpy.
-const MARK_FRAME_COUNT = 9;
-const MARK_FRAME_WIDTH = 36; // must match .mark's width/background-size in styles.css
+const MARK_FRAME_COUNT = 14;
+const MARK_FRAME_WIDTH = 35; // must match .mark's width/background-size in styles.css
 const MARK_FRAME_MS = 80; // playback speed while animating
 const MARK_SCROLL_IDLE_MS = 150; // how long without a scroll event before "stopped"
 
