@@ -288,12 +288,13 @@ window.addEventListener('scroll', endMarkIntro, { passive: true });
 
 // Background color cycle: while the mark's intro loop plays (see
 // above), the page background continuously, smoothly cycles through
-// this 5-stop loop (the 6th stop is the 1st again, closing it) at the
-// same pace as one full run-cycle lap -- BG_CYCLE_MS equals
-// MARK_FRAME_COUNT * MARK_FRAME_MS exactly, not a separately-tuned
-// duration. Driven by elapsed time via requestAnimationFrame (not a
-// CSS transition) for genuinely smooth interpolation regardless of
-// frame rate, the same technique used for the Contact fade above.
+// this 5-stop loop (the 6th stop is the 1st again, closing it) at half
+// the run-cycle's own pace -- BG_CYCLE_MS is derived from
+// MARK_FRAME_COUNT * MARK_FRAME_MS (one run-cycle lap), not a
+// separately-tuned duration, just doubled. Driven by elapsed time via
+// requestAnimationFrame (not a CSS transition) for genuinely smooth
+// interpolation regardless of frame rate, the same technique used for
+// the Contact fade above.
 // Applied as an inline style on <body>, not by changing --bg itself:
 // --bg is also read by several other elements (the Contact/mark
 // gradients) that must stay the normal, unanimated color throughout.
@@ -305,7 +306,7 @@ const BG_CYCLE_COLORS = [
   [0xf5, 0xea, 0xf3], // F5EAF3
   [0xea, 0xeb, 0xf5], // EAEBF5 -- closes the loop
 ];
-const BG_CYCLE_MS = MARK_FRAME_COUNT * MARK_FRAME_MS;
+const BG_CYCLE_MS = MARK_FRAME_COUNT * MARK_FRAME_MS * 2; // half the run-cycle's own speed -- one loop takes two laps
 const BG_SEGMENT_MS = BG_CYCLE_MS / (BG_CYCLE_COLORS.length - 1);
 const BG_SETTLED_COLOR = [0xf5, 0xf5, 0xf5]; // matches --bg
 
