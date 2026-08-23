@@ -165,8 +165,11 @@ a:hover { border-color: var(--ink); }
 }
 
 .hero__img {
+  display: block;
   width: 100%;
   aspect-ratio: 745 / 299.7;
+  object-fit: cover;
+  object-position: center;
 }
 
 .hero__scrim {
