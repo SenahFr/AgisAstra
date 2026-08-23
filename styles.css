@@ -175,7 +175,12 @@ a:hover { border-color: var(--ink); }
 .hero__scrim {
   position: absolute;
   inset: 0 var(--pad) 0 var(--pad);
-  background: linear-gradient(180deg, rgba(23, 27, 52, 0) 45%, rgba(23, 27, 52, 0.55) 100%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(23, 27, 52, 0.6) 0%,
+    rgba(23, 27, 52, 0.25) 50%,
+    rgba(23, 27, 52, 0) 78%
+  );
   pointer-events: none;
 }
 
@@ -183,7 +188,8 @@ a:hover { border-color: var(--ink); }
   position: absolute;
   left: calc(var(--pad) + clamp(4px, 3vw, 24px));
   right: calc(var(--pad) + clamp(4px, 3vw, 24px));
-  bottom: clamp(24px, 5vw, 40px);
+  top: 50%;
+  transform: translateY(-50%);
   margin: 0;
   text-align: center;
   color: #f7f3e8;
