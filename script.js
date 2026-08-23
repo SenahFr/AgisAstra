@@ -13,9 +13,10 @@ const FADE_MS = 350; // duration of the "Contact" fade-in/out, driven by real el
 const MARK_SETTLED_HEIGHT = 46; // px -- the logomark's normal (pinned) height
 const MARK_SETTLED_WIDTH = (MARK_SETTLED_HEIGHT * 347) / 450; // same aspect ratio as the sprite frames
 
-let markNaturalTop = 0; // document-relative Y of the logomark's natural (centered) position
+let markNaturalTop = 0; // document-relative Y of the logomark's natural (centered) position, measured at its full intro size
 let markIntroHeight = 0; // px -- current computed value of --mark-intro-height (responsive, see styles.css)
-let markEverPinned = false; // one-way latch: true forever once scroll ever reaches markNaturalTop
+let markPinScrollY = 0; // scrollY at which the shrinking mark's natural position actually reaches the viewport top (see markPinScrollY comment in measure())
+let markEverPinned = false; // one-way latch: true forever once scroll ever reaches markPinScrollY
 
 // Latched state, not recomputed from scratch every frame: without a
 // buffer, tiny scroll jitter right at a boundary (trackpad momentum,
@@ -108,6 +109,23 @@ function measure() {
   if (wasPinned) markBar.classList.remove('is-pinned');
   markNaturalTop = markBarSlot.getBoundingClientRect().top + window.scrollY;
   if (wasPinned) markBar.classList.add('is-pinned');
+
+  // markNaturalTop alone isn't the right pin/lock trigger: .site-header
+  // vertically centers its content (justify-content: center), and the
+  // mark's own height is exactly what's shrinking as scroll progresses
+  // toward that point -- so the slot's *live* natural position keeps
+  // drifting downward as the mark shrinks (centering always splits a
+  // height change evenly above/below the centered block, so losing
+  // height pushes the top edge down by half as much). A trigger fired
+  // at the raw markNaturalTop -- measured back at full (unshrunk) size
+  // -- fires early: the live position is still (markIntroHeight -
+  // MARK_SETTLED_HEIGHT) / 2 px below the viewport top at that moment,
+  // so snapping straight to position: fixed; top: 0 is a visible jump.
+  // Solving for the scrollY where the shrinking box's own live position
+  // actually reaches 0 -- self-consistently, since the shrink amount at
+  // that point is itself a function of how close scroll has gotten to
+  // it -- adds exactly that same half-the-total-shrink offset back on.
+  markPinScrollY = markNaturalTop + (markIntroHeight - MARK_SETTLED_HEIGHT) / 2;
 }
 
 function update() {
@@ -158,16 +176,18 @@ function update() {
   }
 
   // Logomark size: continuously tied to how far scroll has progressed
-  // toward markNaturalTop (0 = markIntroHeight, 1 = MARK_SETTLED_HEIGHT)
+  // toward markPinScrollY (0 = markIntroHeight, 1 = MARK_SETTLED_HEIGHT)
   // -- a scrubber, reversible in either direction, UNTIL scroll has
-  // ever reached markNaturalTop at least once (markEverPinned), at
+  // ever reached markPinScrollY at least once (markEverPinned), at
   // which point it's locked at the settled size for good, even if
-  // scrolled back up past that point afterward.
-  if (!markEverPinned && y > markNaturalTop) markEverPinned = true;
+  // scrolled back up past that point afterward. markPinScrollY (not
+  // the raw markNaturalTop) is the threshold both here and in the pin
+  // logic below -- see the comment on it in measure() for why.
+  if (!markEverPinned && y > markPinScrollY) markEverPinned = true;
   const scaleProgress = markEverPinned
     ? 1
-    : markNaturalTop > 0
-      ? Math.min(1, Math.max(0, y / markNaturalTop))
+    : markPinScrollY > 0
+      ? Math.min(1, Math.max(0, y / markPinScrollY))
       : 1;
   const markHeight = markIntroHeight + (MARK_SETTLED_HEIGHT - markIntroHeight) * scaleProgress;
   mark.style.height = markHeight + 'px';
@@ -189,11 +209,11 @@ function update() {
   // own natural height keeps changing while scrolling, so there's no
   // single natural value to cache ahead of time.
   if (markIsPinned) {
-    if (y < markNaturalTop - HYSTERESIS) {
+    if (y < markPinScrollY - HYSTERESIS) {
       markIsPinned = false;
       markBarSlot.style.height = '';
     }
-  } else if (y > markNaturalTop) {
+  } else if (y > markPinScrollY) {
     markBarSlot.style.height = markBarSlot.getBoundingClientRect().height + 'px';
     markIsPinned = true;
   }
