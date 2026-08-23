@@ -318,13 +318,17 @@ window.addEventListener('scroll', endMarkIntro, { passive: true });
 // Applied as an inline style on <body>, not by changing --bg itself:
 // --bg is also read by several other elements (the Contact/mark
 // gradients) that must stay the normal, unanimated color throughout.
+// 10% more saturated (in HSL) than the original EAEBF5/F5F4EA/F5EAEA/
+// EAF5F0/F5EAF3 palette -- a small shift in raw RGB terms since these
+// pastels sit at ~94% lightness, where HSL saturation has little room
+// to move the channels regardless of the percentage applied.
 const BG_CYCLE_COLORS = [
-  [0xea, 0xeb, 0xf5], // EAEBF5
-  [0xf5, 0xf4, 0xea], // F5F4EA
-  [0xf5, 0xea, 0xea], // F5EAEA
-  [0xea, 0xf5, 0xf0], // EAF5F0
-  [0xf5, 0xea, 0xf3], // F5EAF3
-  [0xea, 0xeb, 0xf5], // EAEBF5 -- closes the loop
+  [0xe9, 0xeb, 0xf6], // E9EBF6
+  [0xf6, 0xf4, 0xe9], // F6F4E9
+  [0xf6, 0xe9, 0xe9], // F6E9E9
+  [0xe9, 0xf6, 0xf0], // E9F6F0
+  [0xf6, 0xe9, 0xf3], // F6E9F3
+  [0xe9, 0xeb, 0xf6], // E9EBF6 -- closes the loop
 ];
 const BG_CYCLE_MS = MARK_FRAME_COUNT * MARK_FRAME_MS * 2; // half the run-cycle's own speed -- one loop takes two laps
 const BG_SEGMENT_MS = BG_CYCLE_MS / (BG_CYCLE_COLORS.length - 1);
@@ -335,10 +339,11 @@ const BG_SETTLED_COLOR = [0xf5, 0xf5, 0xf5]; // matches --bg
 // per-channel darken applied to the live interpolated background color
 // each frame, rather than a second hand-authored color list, so it
 // can't drift out of sync with it. WORDMARK_INK_COLOR is where it
-// settles back to once scrolling ends the intro, matching --ink.
+// settles back to once scrolling ends the intro, matching .wordmark's
+// own color in styles.css (10% more saturated than the sitewide --ink).
 const WORDMARK_SHADE_STEP = 32; // per-shade darken amount
 const WORDMARK_DARKEN = WORDMARK_SHADE_STEP * 2; // "two shades darker"
-const WORDMARK_INK_COLOR = [0x17, 0x1b, 0x34]; // matches --ink
+const WORDMARK_INK_COLOR = [0x16, 0x1a, 0x35]; // matches .wordmark's color, #161a35
 
 function lerpColor(a, b, t) {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
