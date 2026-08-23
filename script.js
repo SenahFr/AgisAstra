@@ -4,6 +4,7 @@ const contactHeading = document.getElementById('contactHeading');
 const markBarSlot = document.getElementById('markBarSlot');
 const markBar = document.getElementById('markBar');
 const mark = document.getElementById('mark');
+const wordmark = document.getElementById('wordmark');
 
 const EARLY_THRESHOLD = 24; // scroll past this before "Contact" appears pinned
 const HYSTERESIS = 16; // px of scroll buffer at each boundary before it can flip back
@@ -329,8 +330,22 @@ const BG_CYCLE_MS = MARK_FRAME_COUNT * MARK_FRAME_MS * 2; // half the run-cycle'
 const BG_SEGMENT_MS = BG_CYCLE_MS / (BG_CYCLE_COLORS.length - 1);
 const BG_SETTLED_COLOR = [0xf5, 0xf5, 0xf5]; // matches --bg
 
+// The wordmark pulses through the same cycle, in lockstep, but "two
+// shades darker" than whatever the background currently is -- a flat
+// per-channel darken applied to the live interpolated background color
+// each frame, rather than a second hand-authored color list, so it
+// can't drift out of sync with it. WORDMARK_INK_COLOR is where it
+// settles back to once scrolling ends the intro, matching --ink.
+const WORDMARK_SHADE_STEP = 32; // per-shade darken amount
+const WORDMARK_DARKEN = WORDMARK_SHADE_STEP * 2; // "two shades darker"
+const WORDMARK_INK_COLOR = [0x17, 0x1b, 0x34]; // matches --ink
+
 function lerpColor(a, b, t) {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+}
+
+function darkenColor([r, g, b], amount) {
+  return [Math.max(0, r - amount), Math.max(0, g - amount), Math.max(0, b - amount)];
 }
 
 function colorToCss([r, g, b]) {
@@ -342,6 +357,11 @@ function currentBodyColor() {
   return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : BG_CYCLE_COLORS[0];
 }
 
+function currentWordmarkColor() {
+  const m = getComputedStyle(wordmark).color.match(/(\d+),\s*(\d+),\s*(\d+)/);
+  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : WORDMARK_INK_COLOR;
+}
+
 let bgCycleStartTime = null;
 let bgCycleRafId = null;
 
@@ -350,7 +370,9 @@ function stepBgCycle(now) {
   const elapsed = (now - bgCycleStartTime) % BG_CYCLE_MS;
   const seg = Math.min(BG_CYCLE_COLORS.length - 2, Math.floor(elapsed / BG_SEGMENT_MS));
   const segT = (elapsed - seg * BG_SEGMENT_MS) / BG_SEGMENT_MS;
-  document.body.style.backgroundColor = colorToCss(lerpColor(BG_CYCLE_COLORS[seg], BG_CYCLE_COLORS[seg + 1], segT));
+  const bgColor = lerpColor(BG_CYCLE_COLORS[seg], BG_CYCLE_COLORS[seg + 1], segT);
+  document.body.style.backgroundColor = colorToCss(bgColor);
+  wordmark.style.color = colorToCss(darkenColor(bgColor, WORDMARK_DARKEN));
   bgCycleRafId = requestAnimationFrame(stepBgCycle);
 }
 
@@ -359,15 +381,18 @@ bgCycleRafId = requestAnimationFrame(stepBgCycle);
 let bgSettleStartTime = null;
 let bgSettleDuration = 0;
 let bgSettleFromColor = null;
+let wordmarkSettleFromColor = null;
 
 function stepBgSettle(now) {
   if (bgSettleStartTime === null) bgSettleStartTime = now;
   const t = Math.min(1, (now - bgSettleStartTime) / bgSettleDuration);
   document.body.style.backgroundColor = colorToCss(lerpColor(bgSettleFromColor, BG_SETTLED_COLOR, t));
+  wordmark.style.color = colorToCss(lerpColor(wordmarkSettleFromColor, WORDMARK_INK_COLOR, t));
   if (t < 1) {
     requestAnimationFrame(stepBgSettle);
   } else {
     document.body.style.backgroundColor = ''; // hand off to the CSS var(--bg) rule
+    wordmark.style.color = ''; // hand off to the CSS var(--ink) rule (via body's color)
   }
 }
 
@@ -377,6 +402,7 @@ function endBgCycle(durationMs) {
     bgCycleRafId = null;
   }
   bgSettleFromColor = currentBodyColor();
+  wordmarkSettleFromColor = currentWordmarkColor();
   bgSettleDuration = Math.max(durationMs, 1);
   bgSettleStartTime = null;
   requestAnimationFrame(stepBgSettle);
