@@ -317,17 +317,18 @@ window.addEventListener('scroll', endMarkIntro, { passive: true });
 // Applied as an inline style on <body>, not by changing --bg itself:
 // --bg is also read by several other elements (the Contact/mark
 // gradients) that must stay the normal, unanimated color throughout.
-// 10% more saturated (in HSL) than the original EAEBF5/F5F4EA/F5EAEA/
-// EAF5F0/F5EAF3 palette -- a small shift in raw RGB terms since these
-// pastels sit at ~94% lightness, where HSL saturation has little room
-// to move the channels regardless of the percentage applied.
+// ~26% more saturated (in HSL) than the original EAEBF5/F5F4EA/F5EAEA/
+// EAF5F0/F5EAF3 palette (two successive boosts: 10%, then another
+// 15%) -- a modest shift in raw RGB terms since these pastels sit at
+// ~94% lightness, where HSL saturation has little room to move the
+// channels regardless of the percentage applied.
 const BG_CYCLE_COLORS = [
-  [0xe9, 0xeb, 0xf6], // E9EBF6
-  [0xf6, 0xf4, 0xe9], // F6F4E9
-  [0xf6, 0xe9, 0xe9], // F6E9E9
-  [0xe9, 0xf6, 0xf0], // E9F6F0
-  [0xf6, 0xe9, 0xf3], // F6E9F3
-  [0xe9, 0xeb, 0xf6], // E9EBF6 -- closes the loop
+  [0xe8, 0xea, 0xf7], // E8EAF7
+  [0xf7, 0xf5, 0xe8], // F7F5E8
+  [0xf7, 0xe8, 0xe8], // F7E8E8
+  [0xe8, 0xf7, 0xf0], // E8F7F0
+  [0xf7, 0xe8, 0xf4], // F7E8F4
+  [0xe8, 0xea, 0xf7], // E8EAF7 -- closes the loop
 ];
 const BG_CYCLE_MS = 15000; // one full loop -- slow, ambient, not synced to the run-cycle
 const BG_SEGMENT_MS = BG_CYCLE_MS / (BG_CYCLE_COLORS.length - 1);
