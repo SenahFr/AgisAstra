@@ -339,11 +339,11 @@ const BG_SETTLED_COLOR = [0xf5, 0xf5, 0xf5]; // matches --bg
 // per-channel darken applied to the live interpolated background color
 // each frame, rather than a second hand-authored color list, so it
 // can't drift out of sync with it. WORDMARK_INK_COLOR is where it
-// settles back to once scrolling ends the intro, matching .wordmark's
-// own color in styles.css (10% more saturated than the sitewide --ink).
+// settles back to once scrolling ends the intro, matching --ink (the
+// wordmark has no color of its own, so it inherits body's).
 const WORDMARK_SHADE_STEP = 32; // per-shade darken amount
 const WORDMARK_DARKEN = WORDMARK_SHADE_STEP * 2; // "two shades darker"
-const WORDMARK_INK_COLOR = [0x16, 0x1a, 0x35]; // matches .wordmark's color, #161a35
+const WORDMARK_INK_COLOR = [0x17, 0x1b, 0x34]; // matches --ink
 
 function lerpColor(a, b, t) {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
