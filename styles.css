@@ -267,6 +267,7 @@ a:hover { border-color: var(--ink); }
   gap: 56px;
 }
 
+
 @media (min-width: 760px) {
   .details {
     grid-template-columns: 1fr 1fr;
@@ -297,6 +298,16 @@ a:hover { border-color: var(--ink); }
 
 .contact-heading-slot {
   display: flow-root;
+  /* Pulls this whole trailing group (Contact's slot, Custos
+     Libri/Bennie Trela, and the email/phone block) up together so the
+     phone number's own text baseline -- not just its box edge -- lands
+     even with the baseline of .blurb's last line opposite it in the
+     other column (their font-size/line-height differ, so the natural
+     gap above each isn't the same). Applied here rather than on
+     .contact alone so the spacing *within* the group (name to email to
+     phone) stays exactly as authored. Calibrated at the 1434px
+     reference viewport. */
+  margin-top: clamp(-85px, -4.19vw, -35px);
 }
 
 .contact-sentinel {
@@ -448,7 +459,22 @@ a:hover { border-color: var(--ink); }
 .site-footer {
   max-width: 1920px;
   margin: 0 auto;
-  padding: 0 var(--pad) clamp(32px, 5vw, 48px);
+  /* max(0px, calc(100vh - 830px)) is 0 on any ordinarily-tall viewport
+     and only grows on unusually tall ones -- it guarantees enough
+     scrollable room exists below the Contact pin-heading's sentinel
+     (in .details) for it to ever reach the viewport top. .site-header's
+     own min-height: 100vh means taller viewports push everything below
+     it, sentinel included, down by that same amount, so the room
+     needed below the sentinel grows 1:1 with viewport height with no
+     fixed amount of real content ever fully covering it (830px is that
+     relationship's constant, measured directly). Without this, on a
+     tall-enough viewport there's not enough page left after Custos
+     Libri/the email block for the sentinel to reach the top, and the
+     "Contact" bar is stuck in its floating .is-pinned state
+     indefinitely -- which has no backdrop of its own (see
+     .contact-heading.is-pinned) and so visibly overlaps whatever it's
+     scrolled over. */
+  padding: 0 var(--pad) calc(clamp(32px, 5vw, 48px) + max(0px, calc(100vh - 830px)));
 }
 
 .site-footer p {

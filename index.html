@@ -60,6 +60,24 @@
     <section class="details" id="contact">
       <div class="details__col">
         <h3 class="section-title">Services</h3>
+        <!-- Always in normal flow -- a zero-height marker used purely to
+             read a live, always-accurate "how far until Contact's pin
+             point reaches the top" measurement each scroll frame (see
+             script.js), so the pin/lock threshold can't go stale the way
+             a one-time cached measurement could. Deliberately placed
+             here rather than immediately before .contact-heading-slot
+             below: with Services ahead of the contact info block, there
+             isn't always a full viewport height of real page left after
+             that block for the sentinel to ever reach the viewport top
+             (needed for is-locked to ever engage) -- putting it here
+             means the Services list itself counts as "trailing" content
+             for that purpose, without needing padding invented purely to
+             make room. It doesn't need to sit next to the heading it
+             times: is-locked is position: fixed either way, so its
+             screen position doesn't depend on the sentinel's document
+             position -- only *when* the switch from .is-pinned happens
+             does. -->
+        <span class="contact-sentinel" id="contactSentinel"></span>
         <ul class="services">
           <li>Tax Preparation &amp; Filing</li>
           <li>Individual Tax Returns</li>
@@ -73,12 +91,6 @@
         </ul>
 
         <div class="contact-heading-slot" id="contactHeadingSlot">
-          <!-- Always in normal flow -- a zero-height marker used purely
-               to read a live, always-accurate "how far until Contact's
-               natural spot reaches the top" measurement each scroll
-               frame (see script.js), so the pin/lock threshold can't go
-               stale the way a one-time cached measurement could. -->
-          <span class="contact-sentinel" id="contactSentinel"></span>
           <div class="contact-heading" id="contactHeading">
             <span class="contact-heading__text">Contact</span>
           </div>
