@@ -278,6 +278,86 @@ function endMarkIntro() {
 
   markSettling = true;
   if (markTimer === null) markTimer = setInterval(stepMarkFrame, MARK_FRAME_MS);
+
+  // Background fades back to normal over exactly the same span the
+  // mark takes to finish settling, so both land together.
+  endBgCycle(shrinkStepsTotal * MARK_FRAME_MS);
 }
 
 window.addEventListener('scroll', endMarkIntro, { passive: true });
+
+// Background color cycle: while the mark's intro loop plays (see
+// above), the page background continuously, smoothly cycles through
+// this 5-stop loop (the 6th stop is the 1st again, closing it) at the
+// same pace as one full run-cycle lap -- BG_CYCLE_MS equals
+// MARK_FRAME_COUNT * MARK_FRAME_MS exactly, not a separately-tuned
+// duration. Driven by elapsed time via requestAnimationFrame (not a
+// CSS transition) for genuinely smooth interpolation regardless of
+// frame rate, the same technique used for the Contact fade above.
+// Applied as an inline style on <body>, not by changing --bg itself:
+// --bg is also read by several other elements (the Contact/mark
+// gradients) that must stay the normal, unanimated color throughout.
+const BG_CYCLE_COLORS = [
+  [0xea, 0xeb, 0xf5], // EAEBF5
+  [0xf5, 0xf4, 0xea], // F5F4EA
+  [0xf5, 0xea, 0xea], // F5EAEA
+  [0xea, 0xf5, 0xf0], // EAF5F0
+  [0xf5, 0xea, 0xf3], // F5EAF3
+  [0xea, 0xeb, 0xf5], // EAEBF5 -- closes the loop
+];
+const BG_CYCLE_MS = MARK_FRAME_COUNT * MARK_FRAME_MS;
+const BG_SEGMENT_MS = BG_CYCLE_MS / (BG_CYCLE_COLORS.length - 1);
+const BG_SETTLED_COLOR = [0xf5, 0xf5, 0xf5]; // matches --bg
+
+function lerpColor(a, b, t) {
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+}
+
+function colorToCss([r, g, b]) {
+  return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+}
+
+function currentBodyColor() {
+  const m = getComputedStyle(document.body).backgroundColor.match(/(\d+),\s*(\d+),\s*(\d+)/);
+  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : BG_CYCLE_COLORS[0];
+}
+
+let bgCycleStartTime = null;
+let bgCycleRafId = null;
+
+function stepBgCycle(now) {
+  if (bgCycleStartTime === null) bgCycleStartTime = now;
+  const elapsed = (now - bgCycleStartTime) % BG_CYCLE_MS;
+  const seg = Math.min(BG_CYCLE_COLORS.length - 2, Math.floor(elapsed / BG_SEGMENT_MS));
+  const segT = (elapsed - seg * BG_SEGMENT_MS) / BG_SEGMENT_MS;
+  document.body.style.backgroundColor = colorToCss(lerpColor(BG_CYCLE_COLORS[seg], BG_CYCLE_COLORS[seg + 1], segT));
+  bgCycleRafId = requestAnimationFrame(stepBgCycle);
+}
+
+bgCycleRafId = requestAnimationFrame(stepBgCycle);
+
+let bgSettleStartTime = null;
+let bgSettleDuration = 0;
+let bgSettleFromColor = null;
+
+function stepBgSettle(now) {
+  if (bgSettleStartTime === null) bgSettleStartTime = now;
+  const t = Math.min(1, (now - bgSettleStartTime) / bgSettleDuration);
+  document.body.style.backgroundColor = colorToCss(lerpColor(bgSettleFromColor, BG_SETTLED_COLOR, t));
+  if (t < 1) {
+    requestAnimationFrame(stepBgSettle);
+  } else {
+    document.body.style.backgroundColor = ''; // hand off to the CSS var(--bg) rule
+  }
+}
+
+function endBgCycle(durationMs) {
+  if (bgCycleRafId !== null) {
+    cancelAnimationFrame(bgCycleRafId);
+    bgCycleRafId = null;
+  }
+  bgSettleFromColor = currentBodyColor();
+  bgSettleDuration = Math.max(durationMs, 1);
+  bgSettleStartTime = null;
+  requestAnimationFrame(stepBgSettle);
+}
