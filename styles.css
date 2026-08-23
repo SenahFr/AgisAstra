@@ -37,6 +37,11 @@
   --font-body: 'aktiv-grotesk', 'Inter', Helvetica, Arial, sans-serif;
 
   --pad: clamp(20px, 2.6vw, 48px);
+
+  /* ~185px on a 13" MacBook Pro's browser viewport (~1434px wide) --
+     scales with viewport width like --pad above, clamped so it can't
+     shrink to nothing on narrow screens or balloon on huge ones. */
+  --mark-intro-height: clamp(100px, 13vw, 240px);
 }
 
 * { box-sizing: border-box; }
@@ -88,34 +93,36 @@ a:hover { border-color: var(--ink); }
 }
 
 /* .mark shows one frame of a 14-frame running-cycle sprite sheet
-   (347x450px per frame) via background-position, stepped by
-   script.js -- see MARK_FRAME_WIDTH there. Sized to match the
-   previous static mark.png's rendered proportions exactly (same
-   height, same aspect ratio) so swapping to the sprite caused no
-   layout shift. */
+   (347x450px per frame, so a 1400% / 14-frame background-size) via a
+   *percentage* background-position, stepped by script.js -- see
+   MARK_FRAME_COUNT there. Percentage positioning (background-position-x:
+   i / (N-1) * 100%, the standard CSS sprite-animation formula) is what
+   lets width/height below be sized in plain CSS -- pixel positioning
+   would need script.js to know the element's current rendered size
+   (and recompute on every resize) to keep frames aligned; percentages
+   track it automatically, including mid-transition while it's actively
+   resizing.
 
-/* Starts at 1.5x, looping continuously (see script.js's intro loop),
-   for the very first thing a visitor sees on load. The moment they
-   scroll it shrinks smoothly back to its true 1x size via this
-   transition, at which point it also picks up the scroll-driven
-   pin/run-cycle behavior above. transform: scale() only affects
-   painting, not layout, so this never disturbs .mark-bar's flex
-   centering or the reserved slot height. */
+   Starts at --mark-intro-height tall (responsive, see :root), looping
+   continuously (see script.js's intro loop), for the very first thing
+   a visitor sees on load. The moment they scroll it shrinks smoothly
+   back to its true 1x (46px) size via this transition, at which point
+   it also picks up the scroll-driven pin/run-cycle behavior above. */
 
 .mark {
   display: block;
-  width: 35px;
-  height: 46px;
+  height: var(--mark-intro-height);
+  width: calc(var(--mark-intro-height) * 347 / 450);
   background-image: url('assets/logo/mark-run-sprite.webp');
   background-repeat: no-repeat;
-  background-size: 490px 46px;
-  background-position: 0 0;
-  transform: scale(1.5);
-  transition: transform 0.6s ease;
+  background-size: 1400% 100%;
+  background-position: 0% 0;
+  transition: width 0.6s ease, height 0.6s ease;
 }
 
 .mark.is-settled {
-  transform: scale(1);
+  height: 46px;
+  width: calc(46px * 347 / 450);
 }
 
 /* Placeholder boxes -- stand in for photography (the logomark above is

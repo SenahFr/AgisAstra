@@ -160,8 +160,7 @@ window.addEventListener('resize', () => {
 // out the current stride -- until it naturally lands on frame 0, then
 // stops there. That "settle" behavior is what makes the return look
 // smooth instead of jumpy.
-const MARK_FRAME_COUNT = 14;
-const MARK_FRAME_WIDTH = 35; // must match .mark's width/background-size in styles.css
+const MARK_FRAME_COUNT = 14; // must match .mark's background-size (1400% = 14 frames) in styles.css
 const MARK_FRAME_MS = 80; // playback speed while animating
 const MARK_SCROLL_IDLE_MS = 150; // how long without a scroll event before "stopped"
 
@@ -172,7 +171,10 @@ let markIdleTimer = null;
 
 function setMarkFrame(i) {
   markFrame = ((i % MARK_FRAME_COUNT) + MARK_FRAME_COUNT) % MARK_FRAME_COUNT;
-  mark.style.backgroundPositionX = -(markFrame * MARK_FRAME_WIDTH) + 'px';
+  // Percentage positioning (not pixels) so this stays correctly
+  // aligned regardless of .mark's current rendered size -- see the
+  // comment above .mark in styles.css for why.
+  mark.style.backgroundPositionX = (markFrame / (MARK_FRAME_COUNT - 1)) * 100 + '%';
 }
 
 function stepMarkFrame() {
@@ -205,13 +207,13 @@ function onScrollForMark() {
 window.addEventListener('scroll', onScrollForMark, { passive: true });
 
 // Intro: on load, before any scrolling, the mark plays its run-cycle
-// continuously at 1.5x (the CSS default -- see .mark's base transform
-// in styles.css) rather than only animating in response to scroll like
-// it does from then on. The very first scroll event stops this loop,
-// shrinks it back to 1x (.is-settled, a CSS transition so it eases
-// down rather than snapping), and hands off to onScrollForMark above,
-// which is already listening and will pick up wherever this loop left
-// markFrame.
+// continuously at --mark-intro-height (the CSS default size -- see
+// .mark in styles.css) rather than only animating in response to
+// scroll like it does from then on. The very first scroll event stops
+// this loop, shrinks it back to its normal 46px (.is-settled, a CSS
+// transition so it eases down rather than snapping), and hands off to
+// onScrollForMark above, which is already listening and will pick up
+// wherever this loop left markFrame.
 let introTimer = setInterval(() => setMarkFrame(markFrame + 1), MARK_FRAME_MS);
 
 function endMarkIntro() {
