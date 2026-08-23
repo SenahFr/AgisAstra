@@ -203,3 +203,21 @@ function onScrollForMark() {
 }
 
 window.addEventListener('scroll', onScrollForMark, { passive: true });
+
+// Intro: on load, before any scrolling, the mark plays its run-cycle
+// continuously at 1.5x (the CSS default -- see .mark's base transform
+// in styles.css) rather than only animating in response to scroll like
+// it does from then on. The very first scroll event stops this loop,
+// shrinks it back to 1x (.is-settled, a CSS transition so it eases
+// down rather than snapping), and hands off to onScrollForMark above,
+// which is already listening and will pick up wherever this loop left
+// markFrame.
+let introTimer = setInterval(() => setMarkFrame(markFrame + 1), MARK_FRAME_MS);
+
+function endMarkIntro() {
+  clearInterval(introTimer);
+  mark.classList.add('is-settled');
+  window.removeEventListener('scroll', endMarkIntro);
+}
+
+window.addEventListener('scroll', endMarkIntro, { passive: true });

@@ -94,6 +94,14 @@ a:hover { border-color: var(--ink); }
    height, same aspect ratio) so swapping to the sprite caused no
    layout shift. */
 
+/* Starts at 1.5x, looping continuously (see script.js's intro loop),
+   for the very first thing a visitor sees on load. The moment they
+   scroll it shrinks smoothly back to its true 1x size via this
+   transition, at which point it also picks up the scroll-driven
+   pin/run-cycle behavior above. transform: scale() only affects
+   painting, not layout, so this never disturbs .mark-bar's flex
+   centering or the reserved slot height. */
+
 .mark {
   display: block;
   width: 35px;
@@ -102,6 +110,12 @@ a:hover { border-color: var(--ink); }
   background-repeat: no-repeat;
   background-size: 490px 46px;
   background-position: 0 0;
+  transform: scale(1.5);
+  transition: transform 0.6s ease;
+}
+
+.mark.is-settled {
+  transform: scale(1);
 }
 
 /* Placeholder boxes -- stand in for photography (the logomark above is
