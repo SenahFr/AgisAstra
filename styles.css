@@ -70,11 +70,17 @@ a:hover { border-color: var(--ink); }
    length, and script.js un-pins it if scrolled back above that point. */
 
 .mark-bar {
-  height: 80px;
+  /* Auto rather than a fixed height, so this box always exactly wraps
+     the mark's current (intro or settled) height -- it used to be a
+     fixed 80px sized for the old static 46px icon, which the ~185px
+     intro mark simply overflowed, crashing into the wordmark below
+     since the margin-bottom that creates that gap started from the
+     stale 80px edge, not the mark's real (much lower) bottom edge. */
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  /* ~28px at the 1434px reference viewport (see CLAUDE.md). */
+  margin-bottom: clamp(18px, 2vw, 32px);
 }
 
 .mark-bar.is-pinned {
@@ -105,9 +111,12 @@ a:hover { border-color: var(--ink); }
 
    Starts at --mark-intro-height tall (responsive, see :root), looping
    continuously (see script.js's intro loop), for the very first thing
-   a visitor sees on load. The moment they scroll it shrinks smoothly
-   back to its true 1x (46px) size via this transition, at which point
-   it also picks up the scroll-driven pin/run-cycle behavior above. */
+   a visitor sees on load. The moment they scroll, it shrinks back to
+   its true 1x (46px) size in the same discrete per-frame steps as the
+   run-cycle itself (script.js sets width/height directly alongside
+   each frame change, no CSS transition involved) -- finishing exactly
+   when it settles back to frame 0, at which point it also picks up
+   the scroll-driven pin/run-cycle behavior above. */
 
 .mark {
   display: block;
@@ -117,7 +126,6 @@ a:hover { border-color: var(--ink); }
   background-repeat: no-repeat;
   background-size: 1400% 100%;
   background-position: 0% 0;
-  transition: width 0.6s ease, height 0.6s ease;
 }
 
 .mark.is-settled {
