@@ -10,7 +10,12 @@ const HYSTERESIS = 16; // px of scroll buffer at each boundary before it can fli
 
 const FADE_MS = 350; // duration of the "Contact" fade-in/out, driven by real elapsed time (see below)
 
+const MARK_SETTLED_HEIGHT = 46; // px -- the logomark's normal (pinned) height
+const MARK_SETTLED_WIDTH = (MARK_SETTLED_HEIGHT * 347) / 450; // same aspect ratio as the sprite frames
+
 let markNaturalTop = 0; // document-relative Y of the logomark's natural (centered) position
+let markIntroHeight = 0; // px -- current computed value of --mark-intro-height (responsive, see styles.css)
+let markEverPinned = false; // one-way latch: true forever once scroll ever reaches markNaturalTop
 
 // Latched state, not recomputed from scratch every frame: without a
 // buffer, tiny scroll jitter right at a boundary (trackpad momentum,
@@ -59,18 +64,23 @@ function stepFade(now) {
   }
 }
 
-// One-time (+resize, +after the mark's intro shrink) layout
-// measurements: how tall the slot needs to be to reserve Contact's
-// natural space in the column, and how wide the locked heading should
-// render (position: fixed doesn't inherit width from its parent the
-// way normal flow would). These don't need to be live -- a stale
+// One-time (+resize) layout measurements: how tall the slot needs to
+// be to reserve Contact's natural space in the column, how wide the
+// locked heading should render (position: fixed doesn't inherit width
+// from its parent the way normal flow would), the logomark's natural
+// top (the scroll-linked scale/pin threshold), and its current
+// (responsive) intro size. These don't need to be live -- a stale
 // reserved height/width from a later font swap is at worst a few px
-// of layout looseness, not a threshold bug. Each slot's own explicit
-// height IS cleared before reading its rect, though: leaving it set
-// would make getBoundingClientRect() just report that same stale
-// value back on every subsequent call (rather than the natural
+// of layout looseness, not a threshold bug. contactHeadingSlot's own
+// explicit height IS cleared before reading its rect, though: leaving
+// it set would make getBoundingClientRect() just report that same
+// stale value back on every subsequent call (rather than the natural
 // content height), permanently locking in whatever was measured the
-// very first time.
+// very first time. (markBarSlot's reserved height is handled
+// separately, right at the moment the mark actually pins -- see
+// update() -- since unlike Contact, the mark's own size continuously
+// changes while scrolling, so there's no single "natural" height to
+// cache here.)
 function measure() {
   const prevClasses = [...contactHeading.classList].filter((c) => c !== 'contact-heading');
   contactHeading.classList.remove(...prevClasses);
@@ -80,13 +90,24 @@ function measure() {
   contactHeading.style.setProperty('--locked-width', rect.width + 'px');
   contactHeading.classList.add(...prevClasses);
 
-  const prevMarkClasses = [...markBar.classList].filter((c) => c !== 'mark-bar');
-  markBar.classList.remove(...prevMarkClasses);
-  markBarSlot.style.height = '';
-  const markRect = markBarSlot.getBoundingClientRect();
-  markNaturalTop = markRect.top + window.scrollY;
-  markBarSlot.style.height = markRect.height + 'px';
-  markBar.classList.add(...prevMarkClasses);
+  // getPropertyValue('--mark-intro-height') on :root would return the
+  // literal unresolved "clamp(100px, 13vw, 240px)" expression (custom
+  // properties don't get resolved to a computed pixel value the way
+  // ordinary properties do) -- parseFloat on that is NaN, which
+  // silently breaks every mark.style.height assignment downstream (an
+  // invalid CSS value is just ignored, not an error). Reading it off
+  // .mark's own *resolved* height instead requires clearing any
+  // inline override first, since that would otherwise report back
+  // whatever was last set rather than the fresh clamp() value -- the
+  // update() call right after every measure() call re-sets it anyway.
+  mark.style.height = '';
+  mark.style.width = '';
+  markIntroHeight = parseFloat(getComputedStyle(mark).height);
+
+  const wasPinned = markBar.classList.contains('is-pinned');
+  if (wasPinned) markBar.classList.remove('is-pinned');
+  markNaturalTop = markBarSlot.getBoundingClientRect().top + window.scrollY;
+  if (wasPinned) markBar.classList.add('is-pinned');
 }
 
 function update() {
@@ -136,16 +157,44 @@ function update() {
     setFadeTarget(shouldPin && isVisible ? 1 : 0);
   }
 
-  // Logomark: pins to the top once scrolling brings its natural
+  // Logomark size: continuously tied to how far scroll has progressed
+  // toward markNaturalTop (0 = markIntroHeight, 1 = MARK_SETTLED_HEIGHT)
+  // -- a scrubber, reversible in either direction, UNTIL scroll has
+  // ever reached markNaturalTop at least once (markEverPinned), at
+  // which point it's locked at the settled size for good, even if
+  // scrolled back up past that point afterward.
+  if (!markEverPinned && y > markNaturalTop) markEverPinned = true;
+  const scaleProgress = markEverPinned
+    ? 1
+    : markNaturalTop > 0
+      ? Math.min(1, Math.max(0, y / markNaturalTop))
+      : 1;
+  const markHeight = markIntroHeight + (MARK_SETTLED_HEIGHT - markIntroHeight) * scaleProgress;
+  mark.style.height = markHeight + 'px';
+  mark.style.width = (markHeight * 347) / 450 + 'px';
+
+  // Logomark pin: pins to the top once scrolling brings its natural
   // (centered-in-header) position within reach of the top, and stays
   // pinned for the rest of the page -- position: fixed isn't bounded
   // by a containing block the way sticky is, so this is simple JS
   // rather than needing sticky's native release/re-engage behavior.
-  // Same hysteresis buffer as above, for the same reason. Unchanged
-  // from before.
+  // Same hysteresis buffer as above, for the same reason. Separate
+  // from the (one-way) scale above -- un-pinning (scrolling back up
+  // past the buffer) can still happen and is fully reversible; only
+  // the size stays locked. markBarSlot's reserved height (needed once
+  // mark-bar is removed from flow) is captured right at this
+  // transition, by which point the scale update above has already
+  // sized the mark for the current scroll position, rather than
+  // cached once up front the way contactHeadingSlot's is -- the mark's
+  // own natural height keeps changing while scrolling, so there's no
+  // single natural value to cache ahead of time.
   if (markIsPinned) {
-    if (y < markNaturalTop - HYSTERESIS) markIsPinned = false;
+    if (y < markNaturalTop - HYSTERESIS) {
+      markIsPinned = false;
+      markBarSlot.style.height = '';
+    }
   } else if (y > markNaturalTop) {
+    markBarSlot.style.height = markBarSlot.getBoundingClientRect().height + 'px';
     markIsPinned = true;
   }
   markBar.classList.toggle('is-pinned', markIsPinned);
@@ -167,29 +216,17 @@ window.addEventListener('resize', () => {
 // frame 0, it keeps stepping forward at the same rate -- finishing
 // out the current stride -- until it naturally lands on frame 0, then
 // stops there. That "settle" behavior is what makes the return look
-// smooth instead of jumpy.
+// smooth instead of jumpy. This is independent of the mark's size,
+// which is handled continuously in update() above -- frame and size
+// are separate concerns sharing the same element.
 const MARK_FRAME_COUNT = 14; // must match .mark's background-size (1400% = 14 frames) in styles.css
 const MARK_FRAME_MS = 80; // playback speed while animating
 const MARK_SCROLL_IDLE_MS = 150; // how long without a scroll event before "stopped"
-const MARK_SETTLED_HEIGHT = 46; // px -- must match .mark.is-settled in styles.css
-const MARK_SETTLED_WIDTH = (MARK_SETTLED_HEIGHT * 347) / 450;
 
 let markFrame = 0;
 let markTimer = null;
 let markSettling = false;
 let markIdleTimer = null;
-
-// The intro's shrink (from --mark-intro-height down to 46px) happens
-// in the same discrete per-frame steps as the run-cycle itself, not a
-// separate smooth CSS transition on its own timeline. endMarkIntro()
-// sets shrinkStepsTotal to exactly the number of ticks the forced
-// settle-to-frame-0 it also kicks off will take, so shrinkStepsDone
-// (counted up by applyShrinkStep() alongside every setMarkFrame() call)
-// always reaches shrinkStepsTotal on the same tick markFrame reaches 0.
-let shrinkStepsTotal = 0;
-let shrinkStepsDone = 0;
-let shrinkStartHeight = 0;
-let shrinkStartWidth = 0;
 
 function setMarkFrame(i) {
   markFrame = ((i % MARK_FRAME_COUNT) + MARK_FRAME_COUNT) % MARK_FRAME_COUNT;
@@ -199,52 +236,24 @@ function setMarkFrame(i) {
   mark.style.backgroundPositionX = (markFrame / (MARK_FRAME_COUNT - 1)) * 100 + '%';
 }
 
-function applyShrinkStep() {
-  if (shrinkStepsTotal === 0) return;
-  shrinkStepsDone++;
-  const t = shrinkStepsDone / shrinkStepsTotal;
-  mark.style.height = shrinkStartHeight + (MARK_SETTLED_HEIGHT - shrinkStartHeight) * t + 'px';
-  mark.style.width = shrinkStartWidth + (MARK_SETTLED_WIDTH - shrinkStartWidth) * t + 'px';
-  if (shrinkStepsDone >= shrinkStepsTotal) {
-    shrinkStepsTotal = 0;
-    shrinkStepsDone = 0;
-    // Hand off to the CSS rule (exact values, no lingering rounding)
-    // now that it's fully caught up to what that rule specifies.
-    mark.style.height = '';
-    mark.style.width = '';
-    mark.classList.add('is-settled');
-    // measure() ran once on load while the mark was still at its
-    // (much taller) intro size -- markBarSlot's reserved height and
-    // markNaturalTop (the pin threshold) were captured from that,
-    // now-stale, layout. Re-measure against the real settled layout
-    // so neither is left oversized/mispositioned for the rest of the
-    // page's life.
-    measure();
-    update();
-  }
-}
-
 function stepMarkFrame() {
   const next = markFrame + 1;
   if (markSettling && next % MARK_FRAME_COUNT === 0) {
     setMarkFrame(0);
-    applyShrinkStep();
     clearInterval(markTimer);
     markTimer = null;
     markSettling = false;
     return;
   }
   setMarkFrame(next);
-  applyShrinkStep();
 }
 
 function onScrollForMark() {
-  if (shrinkStepsTotal === 0) markSettling = false;
+  markSettling = false;
   if (markTimer === null) markTimer = setInterval(stepMarkFrame, MARK_FRAME_MS);
 
   clearTimeout(markIdleTimer);
   markIdleTimer = setTimeout(() => {
-    if (shrinkStepsTotal > 0) return; // let the intro's forced settle-and-shrink finish undisturbed
     if (markFrame === 0) {
       clearInterval(markTimer);
       markTimer = null;
@@ -259,29 +268,19 @@ window.addEventListener('scroll', onScrollForMark, { passive: true });
 // Intro: on load, before any scrolling, the mark plays its run-cycle
 // continuously at --mark-intro-height (the CSS default size -- see
 // .mark in styles.css) rather than only animating in response to
-// scroll like it does from then on. The very first scroll event forces
-// an immediate settle-to-frame-0 (regardless of whether scrolling
-// continues past that point) with the shrink synced to those exact
-// steps, so both finish together; from frame 0 / 46px on, it hands off
-// cleanly to the normal scroll-driven behavior above.
+// scroll like it does from then on. The very first scroll event just
+// stops this auto-loop timer -- frame-stepping immediately picks up
+// the normal scroll-driven behavior above (onScrollForMark is already
+// listening for the same event), and the mark's size is already being
+// handled continuously by update() regardless of this loop.
+const BG_SETTLE_MS = MARK_FRAME_MS * 5; // how long the background takes to fade back to normal, below
+
 let introTimer = setInterval(() => setMarkFrame(markFrame + 1), MARK_FRAME_MS);
 
 function endMarkIntro() {
   clearInterval(introTimer);
   window.removeEventListener('scroll', endMarkIntro);
-
-  const rect = mark.getBoundingClientRect();
-  shrinkStartHeight = rect.height;
-  shrinkStartWidth = rect.width;
-  shrinkStepsTotal = MARK_FRAME_COUNT - markFrame; // steps until markFrame next wraps to 0
-  shrinkStepsDone = 0;
-
-  markSettling = true;
-  if (markTimer === null) markTimer = setInterval(stepMarkFrame, MARK_FRAME_MS);
-
-  // Background fades back to normal over exactly the same span the
-  // mark takes to finish settling, so both land together.
-  endBgCycle(shrinkStepsTotal * MARK_FRAME_MS);
+  endBgCycle(BG_SETTLE_MS);
 }
 
 window.addEventListener('scroll', endMarkIntro, { passive: true });

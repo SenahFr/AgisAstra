@@ -109,14 +109,16 @@ a:hover { border-color: var(--ink); }
    track it automatically, including mid-transition while it's actively
    resizing.
 
-   Starts at --mark-intro-height tall (responsive, see :root), looping
-   continuously (see script.js's intro loop), for the very first thing
-   a visitor sees on load. The moment they scroll, it shrinks back to
-   its true 1x (46px) size in the same discrete per-frame steps as the
-   run-cycle itself (script.js sets width/height directly alongside
-   each frame change, no CSS transition involved) -- finishing exactly
-   when it settles back to frame 0, at which point it also picks up
-   the scroll-driven pin/run-cycle behavior above. */
+   height/width here are just the pre-JS fallback, matching the very
+   top of the page (scrollY: 0) -- script.js takes over from the first
+   update() call onward (on load, before any scroll), continuously
+   resizing the mark by an inline style as a function of how far
+   scroll has progressed toward the point it pins, between
+   --mark-intro-height (responsive, see :root) at the top and 46px
+   once pinned. It's also where the mark plays its run-cycle
+   continuously, looping, for the very first thing a visitor sees on
+   load, until the first scroll hands frame-stepping off to the
+   scroll-driven behavior below. */
 
 .mark {
   display: block;
@@ -126,11 +128,6 @@ a:hover { border-color: var(--ink); }
   background-repeat: no-repeat;
   background-size: 1400% 100%;
   background-position: 0% 0;
-}
-
-.mark.is-settled {
-  height: 46px;
-  width: calc(46px * 347 / 450);
 }
 
 /* Placeholder boxes -- stand in for photography (the logomark above is
