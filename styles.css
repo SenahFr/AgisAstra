@@ -286,7 +286,7 @@ a:hover { border-color: var(--ink); }
 }
 
 .contact-heading {
-  padding: 24px 0 20px;
+  padding: 10px 0 8px;
   margin: 0 0 24px;
   z-index: 120;
 }
@@ -296,7 +296,7 @@ a:hover { border-color: var(--ink); }
   top: 0;
   left: 0;
   right: 0;
-  padding: 24px 0 20px var(--pad);
+  padding: 10px 0 8px var(--pad);
   margin: 0;
   /* No background of its own: the logomark's fixed bar (z-index: 100,
      below this element's z-index: 120) already provides a full-width
@@ -326,7 +326,7 @@ a:hover { border-color: var(--ink); }
      not a plain inline style) so it can't also constrain .is-pinned,
      which needs to stay full-width. */
   width: var(--locked-width);
-  padding: 24px 0 20px;
+  padding: 10px 0 8px;
   margin: 0;
 }
 
@@ -363,7 +363,7 @@ a:hover { border-color: var(--ink); }
   font-family: var(--font-body);
   font-weight: 400;
   font-size: 2.2rem;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
 
