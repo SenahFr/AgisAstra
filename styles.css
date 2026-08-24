@@ -345,6 +345,10 @@ a:hover { border-color: var(--ink); }
   font-weight: 400;
   font-size: 2.2rem;
   padding-bottom: 8px;
+  /* Overrides the base a { border-bottom } rule -- this is a link now
+     (opens a new email to Bennie), but the underline was deliberately
+     removed from it. */
+  border-bottom: none;
 }
 
 .eyebrow {
