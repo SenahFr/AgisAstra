@@ -339,34 +339,6 @@ a:hover { border-color: var(--ink); }
   margin: 0;
 }
 
-/* The masking backdrop is a fixed-height pseudo-element rather than a
-   background tied to the heading's own (much shorter) content height.
-   "Custos Libri" sits ~121px below Contact's own top -- if the fade
-   only spans Contact's own ~97px box, the last ~30px of that already
-   fades toward transparent well before "Custos Libri" has scrolled
-   fully clear, so it visibly ghosts through right as/after the lock
-   engages. Solid coverage through 130px (with a small buffer past
-   "Custos Libri") before fading out over the next 20px gives it room
-   to have scrolled safely past first, without requiring much more
-   scroll room below the lock point than that. */
-
-.contact-heading.is-locked::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 150px;
-  background: linear-gradient(
-    to bottom,
-    var(--bg) 0%,
-    var(--bg) 87%,
-    rgba(245, 245, 245, 0) 100%
-  );
-  z-index: -1;
-  pointer-events: none;
-}
-
 .contact-heading__text {
   display: inline-block;
   font-family: var(--font-body);
