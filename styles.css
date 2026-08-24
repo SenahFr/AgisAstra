@@ -307,7 +307,7 @@ a:hover { border-color: var(--ink); }
      .contact alone so the spacing *within* the group (name to email to
      phone) stays exactly as authored. Calibrated at the 1434px
      reference viewport. */
-  margin-top: clamp(-85px, -4.19vw, -35px);
+  margin-top: clamp(-150px, -7.29vw, -75px);
 }
 
 .contact-sentinel {
@@ -459,22 +459,19 @@ a:hover { border-color: var(--ink); }
 .site-footer {
   max-width: 1920px;
   margin: 0 auto;
-  /* max(0px, calc(100vh - 830px)) is 0 on any ordinarily-tall viewport
-     and only grows on unusually tall ones -- it guarantees enough
-     scrollable room exists below the Contact pin-heading's sentinel
-     (in .details) for it to ever reach the viewport top. .site-header's
-     own min-height: 100vh means taller viewports push everything below
-     it, sentinel included, down by that same amount, so the room
-     needed below the sentinel grows 1:1 with viewport height with no
-     fixed amount of real content ever fully covering it (830px is that
-     relationship's constant, measured directly). Without this, on a
-     tall-enough viewport there's not enough page left after Custos
-     Libri/the email block for the sentinel to reach the top, and the
-     "Contact" bar is stuck in its floating .is-pinned state
-     indefinitely -- which has no backdrop of its own (see
-     .contact-heading.is-pinned) and so visibly overlaps whatever it's
-     scrolled over. */
-  padding: 0 var(--pad) calc(clamp(32px, 5vw, 48px) + max(0px, calc(100vh - 830px)));
+  padding: 0 var(--pad) clamp(32px, 5vw, 48px);
+}
+
+/* Zero-height by default; script.js's measure() sizes this at runtime
+   to exactly however much extra scroll room is needed (if any) below
+   the Contact pin-heading's sentinel (in .details) for it to ever
+   reach the viewport top -- see the comment there for why that room
+   isn't guaranteed to exist otherwise. A live measurement rather than
+   a hand-tuned constant here, since the right amount depends on how
+   tall the page's actual content is, which changes with every copy
+   edit. */
+.scroll-spacer {
+  display: block;
 }
 
 .site-footer p {

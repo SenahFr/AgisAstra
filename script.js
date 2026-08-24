@@ -4,6 +4,7 @@ const contactHeading = document.getElementById('contactHeading');
 const markBarSlot = document.getElementById('markBarSlot');
 const markBar = document.getElementById('markBar');
 const mark = document.getElementById('mark');
+const scrollSpacer = document.getElementById('scrollSpacer');
 
 const EARLY_THRESHOLD = 24; // scroll past this before "Contact" appears pinned
 const HYSTERESIS = 16; // px of scroll buffer at each boundary before it can flip back
@@ -126,6 +127,25 @@ function measure() {
   // that point is itself a function of how close scroll has gotten to
   // it -- adds exactly that same half-the-total-shrink offset back on.
   markPinScrollY = markNaturalTop + (markIntroHeight - MARK_SETTLED_HEIGHT) / 2;
+
+  // Contact's sentinel (in .details) needs to be able to reach the
+  // viewport top for is-locked to ever engage -- see the comment on
+  // .contact-heading.is-pinned in styles.css for what breaks if it
+  // can't. That needs the page to have at least one full viewport
+  // height of content left below the sentinel; scrollSpacer is sized
+  // to exactly whatever's short of that (0 if nothing is), rather than
+  // a hand-picked constant, so this keeps working regardless of how
+  // page content changes later. Reset to 0 first: measuring against a
+  // stale, already-nonzero spacer height would under-count the gap on
+  // a later remeasure (e.g. on resize).
+  scrollSpacer.style.height = '0px';
+  const sentinelDocY = contactSentinel.getBoundingClientRect().top + window.scrollY;
+  // +4px of slack: scrollbar/subpixel rounding between innerHeight and
+  // the browser's actual max scroll position can otherwise leave this
+  // just barely short (observed ~0.8px), which is enough to miss the
+  // sentinelTop <= 0 check in update() by a hair.
+  const deficit = sentinelDocY + window.innerHeight - document.documentElement.scrollHeight + 4;
+  scrollSpacer.style.height = Math.max(0, deficit) + 'px';
 }
 
 function update() {
