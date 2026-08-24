@@ -413,6 +413,18 @@ a:hover { border-color: var(--ink); }
   object-position: center 3.7%;
 }
 
+@media (max-width: 759px) {
+  .secondary-img {
+    /* The source photo is a 2:3 portrait -- matching that instead of
+       the desktop's landscape 16:11 crop shows the whole photo
+       uncropped on mobile, the same reasoning as .hero__img's own
+       mobile override above. object-position above becomes a no-op
+       at this exact ratio (nothing left to crop, so nothing to
+       position), left as is rather than overridden to none. */
+    aspect-ratio: 2 / 3;
+  }
+}
+
 .blurb {
   margin: 0;
   font-weight: 400;
