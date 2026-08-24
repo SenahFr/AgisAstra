@@ -238,7 +238,7 @@ a:hover { border-color: var(--ink); }
   border: none;
   border-top: 1px solid var(--line);
   margin: 0 0 28px;
-  width: 60px;
+  width: 100%;
 }
 
 /* Details grid */
