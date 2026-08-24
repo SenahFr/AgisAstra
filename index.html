@@ -66,7 +66,15 @@
     </section>
 
     <section class="details" id="contact">
-      <div class="details__col">
+      <!-- Three independent grid items (see .details in styles.css),
+           not two -- Services and Contact used to share one column div,
+           but that pinned their relative order together in both the
+           mobile (stacked) and desktop (two-column) layouts. Named
+           grid-template-areas let each be placed independently: on
+           mobile, Services -> the photo/blurb -> Contact last; on
+           desktop, Services above Contact in the left column exactly
+           as before, photo/blurb filling the right column throughout. -->
+      <div class="details__services">
         <h3 class="section-title">Services</h3>
         <ul class="services">
           <li>Tax Preparation &amp; Filing</li>
@@ -82,7 +90,23 @@
           <li>Payroll Administration</li>
           <li>Tax Oversight</li>
         </ul>
+      </div>
 
+      <div class="details__col details__col--secondary">
+        <img class="secondary-img" src="assets/secondary/bennie-headshot.jpg" alt="Bennie Trela">
+        <hr class="rule">
+        <p class="blurb">
+          As a lifelong actor, I know how overwhelming our world is, what
+          it&rsquo;s like to wonder where my next gig will come from. At the
+          same time, I&rsquo;ve spent 11 years in accounting. I&rsquo;ve audited
+          private equity companies, worked in family offices, and managed
+          financials for Broadway shows. I want to use my powers for good.
+          8-hour rehearsals and &ldquo;defining&rdquo; Alexander Technique are
+          hard enough. Let me handle the business side for you.
+        </p>
+      </div>
+
+      <div class="details__contact">
         <!-- Styled identically to "Services" above (same .section-title
              class). Starts invisible (opacity: 0 pre-JS fallback, see
              styles.css) and script.js fades it in as this scrolls into
@@ -99,20 +123,6 @@
         <p class="contact">
           <a href="mailto:bennie@aegisastra.co">bennie@aegisastra.co</a><br>
           <a href="tel:+14524526380">(452) 452-638</a>
-        </p>
-      </div>
-
-      <div class="details__col details__col--secondary">
-        <img class="secondary-img" src="assets/secondary/bennie-headshot.jpg" alt="Bennie Trela">
-        <hr class="rule">
-        <p class="blurb">
-          As a lifelong actor, I know how overwhelming our world is, what
-          it&rsquo;s like to wonder where my next gig will come from. At the
-          same time, I&rsquo;ve spent 11 years in accounting. I&rsquo;ve audited
-          private equity companies, worked in family offices, and managed
-          financials for Broadway shows. I want to use my powers for good.
-          8-hour rehearsals and &ldquo;defining&rdquo; Alexander Technique are
-          hard enough. Let me handle the business side for you.
         </p>
       </div>
     </section>

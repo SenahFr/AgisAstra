@@ -195,6 +195,17 @@ a:hover { border-color: var(--ink); }
   object-position: center;
 }
 
+@media (max-width: 759px) {
+  .hero__img {
+    /* The desktop crop is a wide banner (~2.5:1) -- cropped to that on
+       a narrow phone screen, it's a thin sliver showing only a small
+       slice of the painting. Closer to the source painting's own
+       proportions (Mantegna's Parnassus is ~1.2:1) shows much more of
+       it instead. */
+    aspect-ratio: 6 / 5;
+  }
+}
+
 .hero__scrim {
   position: absolute;
   inset: 0 var(--pad) 0 var(--pad);
@@ -257,13 +268,31 @@ a:hover { border-color: var(--ink); }
   padding: clamp(40px, 6vw, 64px) var(--pad) clamp(56px, 8vw, 96px);
   display: grid;
   grid-template-columns: 1fr;
+  /* Services, then the photo/blurb, then Contact last -- see the
+     comment on these three elements in index.html for why they're
+     independent grid items rather than two columns' worth of nested
+     content. */
+  grid-template-areas:
+    "services"
+    "secondary"
+    "contact";
   gap: 56px;
 }
 
+.details__services { grid-area: services; }
+.details__col--secondary { grid-area: secondary; }
+.details__contact { grid-area: contact; }
 
 @media (min-width: 760px) {
   .details {
     grid-template-columns: 1fr 1fr;
+    /* secondary spans both rows by occupying that name in both
+       template strings, filling the right column's full height while
+       services/contact stack in the left one -- the same visual
+       layout as before this became three grid items instead of two. */
+    grid-template-areas:
+      "services  secondary"
+      "contact   secondary";
     gap: clamp(32px, 5vw, 96px);
   }
 }
