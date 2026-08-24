@@ -15,6 +15,7 @@ const FADE_MS = 350; // duration of the "Contact" fade-in/out, driven by real el
 
 const MARK_SETTLED_HEIGHT = 46; // px -- the logomark's normal (pinned) height
 const MARK_SETTLED_WIDTH = (MARK_SETTLED_HEIGHT * 347) / 450; // same aspect ratio as the sprite frames
+const MARK_PINNED_TOP_OFFSET = 10.5; // px -- .mark-bar.is-pinned's own top padding, see markPinScrollY below
 
 let markNaturalTop = 0; // document-relative Y of the logomark's natural (centered) position, measured at its full intro size
 let markIntroHeight = 0; // px -- current computed value of --mark-intro-height (responsive, see styles.css)
@@ -138,12 +139,22 @@ function measure() {
   // at the raw markNaturalTop -- measured back at full (unshrunk) size
   // -- fires early: the live position is still (markIntroHeight -
   // MARK_SETTLED_HEIGHT) / 2 px below the viewport top at that moment,
-  // so snapping straight to position: fixed; top: 0 is a visible jump.
-  // Solving for the scrollY where the shrinking box's own live position
-  // actually reaches 0 -- self-consistently, since the shrink amount at
-  // that point is itself a function of how close scroll has gotten to
-  // it -- adds exactly that same half-the-total-shrink offset back on.
-  markPinScrollY = markNaturalTop + (markIntroHeight - MARK_SETTLED_HEIGHT) / 2;
+  // so snapping straight to position: fixed; top: 0 would be a visible
+  // jump. Solving for the scrollY where the shrinking box's own live
+  // position actually reaches the icon's target pinned position --
+  // self-consistently, since the shrink amount at that point is itself
+  // a function of how close scroll has gotten to it -- adds exactly
+  // that same half-the-total-shrink offset back on.
+  //
+  // The target isn't 0: .mark-bar.is-pinned has its own top padding
+  // (MARK_PINNED_TOP_OFFSET) so the icon sits centered in the pinned
+  // bar -- matching height with .contact-heading.is-pinned, which the
+  // bar's now-solid background needs to fully cover -- rather than
+  // flush against the very top of it. Subtracting that offset moves
+  // the trigger earlier by the same amount, so the live position has
+  // already reached exactly that padding's worth of "natural" space
+  // above it at the moment it pins, instead of reaching 0 too late.
+  markPinScrollY = markNaturalTop + (markIntroHeight - MARK_SETTLED_HEIGHT) / 2 - MARK_PINNED_TOP_OFFSET;
 
   // Lines up the phone number's own text baseline with the baseline of
   // .blurb's last line opposite it in the other column, by shifting

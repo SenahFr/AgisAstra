@@ -90,19 +90,19 @@ a:hover { border-color: var(--ink); }
   right: 0;
   z-index: 100;
   margin-bottom: 0;
-  /* Bottom padding brings this bar's total height up to match
+  /* Padding brings this bar's total height up to match
      .contact-heading.is-pinned's own (~67px, driven by its font size
      and padding), so the solid background below fully covers it --
      solid, not the fade this used to be, since a partial fade only
      fully covered whichever of the two elements was shorter, letting
      scrolled content show through behind the taller one's remaining
-     height. Bottom-only, not split top/bottom to center the icon:
-     markPinScrollY (script.js) is solved so the icon's own top edge
-     lands exactly at the viewport top the instant this pins (see the
-     comment there) -- top padding here would push the icon down from
-     that already-correct position, snapping it on pin the same way
-     that fix eliminated in the first place. */
-  padding: 0 0 21px;
+     height. Split evenly top/bottom to center the icon in the bar,
+     matching MARK_PINNED_TOP_OFFSET in script.js: markPinScrollY is
+     solved to account for this padding, so the icon's top edge still
+     lands exactly here (not at 0) the instant this pins, rather than
+     snapping down into it from a position solved for a flush-top
+     icon. */
+  padding: 10.5px 0;
   background: var(--bg);
 }
 
