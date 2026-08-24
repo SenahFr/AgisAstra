@@ -39,6 +39,16 @@
     <h1 class="wordmark">Aegis Astra</h1>
   </header>
 
+  <!-- Always position: fixed (see .contact-heading in styles.css) --
+       never in normal flow, so its place in the DOM doesn't affect
+       layout at all. script.js fades it in once scrolled past the top
+       of the page, and back out again once #contactSectionHeading (in
+       .details, styled to match) scrolls into view to take over --
+       reversed on scrolling back up. -->
+  <div class="contact-heading" id="contactHeading">
+    <a class="contact-heading__text" href="mailto:bennie@aegisastra.co">Contact</a>
+  </div>
+
   <main>
     <section class="hero">
       <img class="hero__img" src="assets/hero/parnassus.jpg" alt="">
@@ -58,24 +68,6 @@
     <section class="details" id="contact">
       <div class="details__col">
         <h3 class="section-title">Services</h3>
-        <!-- Always in normal flow -- a zero-height marker used purely to
-             read a live, always-accurate "how far until Contact's pin
-             point reaches the top" measurement each scroll frame (see
-             script.js), so the pin/lock threshold can't go stale the way
-             a one-time cached measurement could. Deliberately placed
-             here rather than immediately before .contact-heading-slot
-             below: with Services ahead of the contact info block, there
-             isn't always a full viewport height of real page left after
-             that block for the sentinel to ever reach the viewport top
-             (needed for is-locked to ever engage) -- putting it here
-             means the Services list itself counts as "trailing" content
-             for that purpose, without needing padding invented purely to
-             make room. It doesn't need to sit next to the heading it
-             times: is-locked is position: fixed either way, so its
-             screen position doesn't depend on the sentinel's document
-             position -- only *when* the switch from .is-pinned happens
-             does. -->
-        <span class="contact-sentinel" id="contactSentinel"></span>
         <ul class="services">
           <li>Tax Preparation &amp; Filing</li>
           <li>Individual Tax Returns</li>
@@ -91,11 +83,15 @@
           <li>Tax Oversight</li>
         </ul>
 
-        <div class="contact-heading-slot" id="contactHeadingSlot">
-          <div class="contact-heading" id="contactHeading">
-            <a class="contact-heading__text" href="mailto:bennie@aegisastra.co">Contact</a>
-          </div>
-        </div>
+        <!-- Styled identically to "Services" above (same .section-title
+             class). Starts invisible (opacity: 0 pre-JS fallback, see
+             styles.css) and script.js fades it in as this scrolls into
+             view, right as #contactHeading (the fixed menu-bar version,
+             in <header>) fades out to hand off to it -- and reverses
+             both on scrolling back up. Always in normal flow, so it
+             doesn't need any of the reserved-space/position-fixed
+             machinery that element does. -->
+        <h3 class="section-title" id="contactSectionHeading">Contact</h3>
 
         <p class="eyebrow">Custos Libri</p>
         <p class="name">Bennie Trela</p>
@@ -125,9 +121,6 @@
   <footer class="site-footer">
     <p>Copyright Aegis Astra 2026</p>
   </footer>
-
-  <!-- Sized by script.js -- see .scroll-spacer in styles.css. -->
-  <div class="scroll-spacer" id="scrollSpacer" aria-hidden="true"></div>
 
   <script src="script.js"></script>
 </body>

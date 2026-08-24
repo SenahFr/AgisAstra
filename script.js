@@ -1,17 +1,15 @@
-const contactHeadingSlot = document.getElementById('contactHeadingSlot');
-const contactSentinel = document.getElementById('contactSentinel');
 const contactHeading = document.getElementById('contactHeading');
+const contactSectionHeading = document.getElementById('contactSectionHeading');
 const markBarSlot = document.getElementById('markBarSlot');
 const markBar = document.getElementById('markBar');
 const mark = document.getElementById('mark');
-const scrollSpacer = document.getElementById('scrollSpacer');
 const phoneLink = document.querySelector('.contact a[href^="tel:"]');
 const blurb = document.querySelector('.blurb');
 
-const EARLY_THRESHOLD = 24; // scroll past this before "Contact" appears pinned
+const EARLY_THRESHOLD = 24; // scroll past this before "Contact" appears in the header bar
 const HYSTERESIS = 16; // px of scroll buffer at each boundary before it can flip back
 
-const FADE_MS = 350; // duration of the "Contact" fade-in/out, driven by real elapsed time (see below)
+const FADE_MS = 350; // duration of the Contact handoff crossfade, driven by real elapsed time (see below)
 
 const MARK_SETTLED_HEIGHT = 46; // px -- the logomark's normal (pinned) height
 const MARK_SETTLED_WIDTH = (MARK_SETTLED_HEIGHT * 347) / 450; // same aspect ratio as the sprite frames
@@ -24,68 +22,55 @@ let markEverPinned = false; // one-way latch: true forever once scroll ever reac
 
 // Latched state, not recomputed from scratch every frame: without a
 // buffer, tiny scroll jitter right at a boundary (trackpad momentum,
-// rubber-banding) flips a class back and forth many times a second --
-// each flip is a real layout change (is-pinned/is-locked render at
-// different offsets), so that showed up as a visible flicker/jump.
-let isLocked = false;
+// rubber-banding) flips it back and forth many times a second -- each
+// flip is a real crossfade direction change, so that showed up as a
+// visible flicker.
+let isContactSectionVisible = false;
 let isVisible = false;
 let markIsPinned = false;
 
-// The fade is animated by hand, over real elapsed time via
-// requestAnimationFrame, rather than a CSS transition triggered by a
-// class toggle. A CSS transition only animates if the browser gets to
-// paint the "before" state (opacity: 0) at least once before the
-// "after" class is applied -- but a single ordinary scroll input (a
-// mouse-wheel notch or trackpad tick is very often 40-100+px) can push
-// scrollY past both the "start pinning" and "EARLY_THRESHOLD" marks in
-// the same scroll event, so is-pinned and is-visible would both get
-// added in the same synchronous update() call with no frame in
-// between -- opacity jumps straight to 1 with nothing to fade from.
-// Driving it by elapsed time instead guarantees a real multi-frame
-// fade regardless of how big any single scroll step was.
-let fadeTarget = 0;
-let fadeCurrent = 0;
-let fadeStartValue = 0;
-let fadeStartTime = 0;
-let fadeRafId = null;
-
-function setFadeTarget(target) {
-  if (target === fadeTarget) return;
-  fadeTarget = target;
-  fadeStartValue = fadeCurrent;
-  fadeStartTime = performance.now();
-  if (fadeRafId === null) fadeRafId = requestAnimationFrame(stepFade);
-}
-
-function stepFade(now) {
-  const t = Math.min(1, (now - fadeStartTime) / FADE_MS);
-  fadeCurrent = fadeStartValue + (fadeTarget - fadeStartValue) * t;
-  contactHeading.style.opacity = fadeCurrent;
-  contactHeading.style.pointerEvents = fadeCurrent > 0.05 ? 'auto' : 'none';
-  if (t < 1) {
-    fadeRafId = requestAnimationFrame(stepFade);
-  } else {
-    fadeRafId = null;
+// Both Contact elements' opacity/pointer-events are animated by hand,
+// over real elapsed time via requestAnimationFrame, rather than a CSS
+// transition triggered by a class/style toggle. A CSS transition only
+// animates if the browser gets to paint the "before" state at least
+// once before the "after" value is applied -- but a single ordinary
+// scroll input (a mouse-wheel notch or trackpad tick is very often
+// 40-100+px) can push scrollY past a visibility boundary and the next
+// one in the same scroll event, with no frame painted in between, so
+// opacity would jump straight to its new value with nothing to fade
+// from. Driving it by elapsed time instead guarantees a real
+// multi-frame fade regardless of how big any single scroll step was.
+// Both elements fade independently (see the two createFader() calls
+// below update()) but share this same logic and duration.
+function createFader(el) {
+  let target = 0;
+  let current = 0;
+  let startValue = 0;
+  let startTime = 0;
+  let rafId = null;
+  function step(now) {
+    const t = Math.min(1, (now - startTime) / FADE_MS);
+    current = startValue + (target - startValue) * t;
+    el.style.opacity = current;
+    el.style.pointerEvents = current > 0.05 ? 'auto' : 'none';
+    rafId = t < 1 ? requestAnimationFrame(step) : null;
   }
+  return {
+    setTarget(newTarget) {
+      if (newTarget === target) return;
+      target = newTarget;
+      startValue = current;
+      startTime = performance.now();
+      if (rafId === null) rafId = requestAnimationFrame(step);
+    },
+  };
 }
 
-// One-time (+resize) layout measurements: how tall the slot needs to
-// be to reserve Contact's natural space in the column, how wide the
-// locked heading should render (position: fixed doesn't inherit width
-// from its parent the way normal flow would), the logomark's natural
-// top (the scroll-linked scale/pin threshold), and its current
-// (responsive) intro size. These don't need to be live -- a stale
-// reserved height/width from a later font swap is at worst a few px
-// of layout looseness, not a threshold bug. contactHeadingSlot's own
-// explicit height IS cleared before reading its rect, though: leaving
-// it set would make getBoundingClientRect() just report that same
-// stale value back on every subsequent call (rather than the natural
-// content height), permanently locking in whatever was measured the
-// very first time. (markBarSlot's reserved height is handled
-// separately, right at the moment the mark actually pins -- see
-// update() -- since unlike Contact, the mark's own size continuously
-// changes while scrolling, so there's no single "natural" height to
-// cache here.)
+// One-time (+resize) layout measurements: the logomark's natural top
+// (the scroll-linked scale/pin threshold) and its current (responsive)
+// intro size. These don't need to be live -- a stale value from a
+// later font swap is at worst a few px of layout looseness, not a
+// threshold bug.
 // The Y coordinate of an element's own last line of text, as rendered
 // -- not just its box edge, which sits some line-height-dependent
 // distance below it. Standard trick: a zero-size inline-block aligned
@@ -102,14 +87,6 @@ function baselineY(el) {
 }
 
 function measure() {
-  const prevClasses = [...contactHeading.classList].filter((c) => c !== 'contact-heading');
-  contactHeading.classList.remove(...prevClasses);
-  contactHeadingSlot.style.height = '';
-  const rect = contactHeadingSlot.getBoundingClientRect();
-  contactHeadingSlot.style.height = rect.height + 'px';
-  contactHeading.style.setProperty('--locked-width', rect.width + 'px');
-  contactHeading.classList.add(...prevClasses);
-
   // getPropertyValue('--mark-intro-height') on :root would return the
   // literal unresolved "clamp(100px, 13vw, 240px)" expression (custom
   // properties don't get resolved to a computed pixel value the way
@@ -148,8 +125,8 @@ function measure() {
   //
   // The target isn't 0: .mark-bar.is-pinned has its own top padding
   // (MARK_PINNED_TOP_OFFSET) so the icon sits centered in the pinned
-  // bar -- matching height with .contact-heading.is-pinned, which the
-  // bar's now-solid background needs to fully cover -- rather than
+  // bar -- matching height with #contactHeading, which the bar's
+  // now-solid background needs to fully cover -- rather than
   // flush against the very top of it. Subtracting that offset moves
   // the trigger earlier by the same amount, so the live position has
   // already reached exactly that padding's worth of "natural" space
@@ -158,51 +135,41 @@ function measure() {
 
   // Lines up the phone number's own text baseline with the baseline of
   // .blurb's last line opposite it in the other column, by shifting
-  // the whole trailing group (Contact's slot, Custos Libri/Bennie
-  // Trela, and the email/phone block) up or down as one unit --
-  // applied to contactHeadingSlot rather than .contact alone so the
-  // spacing *within* the group stays exactly as authored. Measured
-  // live (not a hand-picked offset) since both paragraphs' line counts
-  // -- and so the natural gap between the two baselines -- change with
-  // whatever copy ends up in either of them.
-  contactHeadingSlot.style.marginTop = '0px';
-  contactHeadingSlot.style.marginTop = (baselineY(blurb) - baselineY(phoneLink)) + 'px';
-
-  // Contact's sentinel (in .details) needs to be able to reach the
-  // viewport top for is-locked to ever engage -- see the comment on
-  // .contact-heading.is-pinned in styles.css for what breaks if it
-  // can't. That needs the page to have at least one full viewport
-  // height of content left below the sentinel; scrollSpacer is sized
-  // to exactly whatever's short of that (0 if nothing is), rather than
-  // a hand-picked constant, so this keeps working regardless of how
-  // page content changes later. Reset to 0 first: measuring against a
-  // stale, already-nonzero spacer height would under-count the gap on
-  // a later remeasure (e.g. on resize).
-  scrollSpacer.style.height = '0px';
-  const sentinelDocY = contactSentinel.getBoundingClientRect().top + window.scrollY;
-  // +4px of slack: scrollbar/subpixel rounding between innerHeight and
-  // the browser's actual max scroll position can otherwise leave this
-  // just barely short (observed ~0.8px), which is enough to miss the
-  // sentinelTop <= 0 check in update() by a hair.
-  const deficit = sentinelDocY + window.innerHeight - document.documentElement.scrollHeight + 4;
-  scrollSpacer.style.height = Math.max(0, deficit) + 'px';
+  // the whole trailing group (#contactSectionHeading, Custos
+  // Libri/Bennie Trela, and the email/phone block) up or down as one
+  // unit -- applied to contactSectionHeading rather than .contact
+  // alone so the spacing *within* the group stays exactly as authored.
+  // Measured live (not a hand-picked offset) since both paragraphs'
+  // line counts -- and so the natural gap between the two baselines --
+  // change with whatever copy ends up in either of them.
+  contactSectionHeading.style.marginTop = '0px';
+  contactSectionHeading.style.marginTop = (baselineY(blurb) - baselineY(phoneLink)) + 'px';
 }
 
 function update() {
   const y = window.scrollY;
 
-  // contactSentinel sits in normal flow immediately before Contact's
-  // slot, so its live distance from the top of the viewport each frame
-  // is exactly "how much further until Contact's natural spot reaches
-  // the top" -- reading it fresh every time (rather than relying on a
-  // single cached measurement) means this boundary can't go stale if a
-  // web font swap reflows the page after load.
-  const sentinelTop = contactSentinel.getBoundingClientRect().top;
+  // contactSectionHeading is always in normal flow (never removed from
+  // it, just faded), so its own live distance from the top of the
+  // viewport each frame is exactly "how much further until it comes
+  // into view" -- reading it fresh every time (rather than relying on
+  // a single cached measurement) means this boundary can't go stale if
+  // a web font swap reflows the page after load. The trigger point is
+  // the vertical middle of the viewport, not the very top: unlike the
+  // old fixed-position "Contact" this replaced, this heading is always
+  // in normal flow, so there's no requirement that it ever be able to
+  // reach the very top of the viewport (which isn't guaranteed on a
+  // short page or a tall one -- see the two earlier, now-removed fixes
+  // for exactly that class of bug). The midpoint is always reachable
+  // by scrolling, on any page/viewport combination, and reads as "as
+  // the contact info comes into view" more literally besides.
+  const sectionTop = contactSectionHeading.getBoundingClientRect().top;
+  const sectionTriggerY = window.innerHeight / 2;
 
-  if (isLocked) {
-    if (sentinelTop > HYSTERESIS) isLocked = false;
-  } else if (sentinelTop <= 0) {
-    isLocked = true;
+  if (isContactSectionVisible) {
+    if (sectionTop > sectionTriggerY + HYSTERESIS) isContactSectionVisible = false;
+  } else if (sectionTop <= sectionTriggerY) {
+    isContactSectionVisible = true;
   }
 
   if (isVisible) {
@@ -211,29 +178,12 @@ function update() {
     isVisible = true;
   }
 
-  const shouldPin = y > 0 && !isLocked;
-
-  contactHeading.classList.toggle('is-pinned', shouldPin);
-  contactHeading.classList.toggle('is-locked', isLocked);
-
-  if (isLocked) {
-    // Once locked it's simply always fully visible -- no fade needed,
-    // and nothing left to animate away from. Set (not clear) the
-    // inline style explicitly: if this later un-locks back to
-    // is-pinned, that class's CSS fallback is opacity: 0, and this
-    // inline value needs to already say 1 so it doesn't flash empty
-    // for a frame before the fade logic below catches up.
-    fadeTarget = 1;
-    fadeCurrent = 1;
-    if (fadeRafId !== null) {
-      cancelAnimationFrame(fadeRafId);
-      fadeRafId = null;
-    }
-    contactHeading.style.opacity = 1;
-    contactHeading.style.pointerEvents = 'auto';
-  } else {
-    setFadeTarget(shouldPin && isVisible ? 1 : 0);
-  }
+  // The header-bar Contact link is visible once scrolled past the very
+  // top of the page and not yet overlapping #contactSectionHeading,
+  // which takes over (crossfading in as this crossfades out) once
+  // that's in view -- and reverses on scrolling back up.
+  contactFader.setTarget(y > 0 && isVisible && !isContactSectionVisible ? 1 : 0);
+  contactSectionFader.setTarget(isContactSectionVisible ? 1 : 0);
 
   // Logomark size: continuously tied to how far scroll has progressed
   // toward markPinScrollY (0 = markIntroHeight, 1 = MARK_SETTLED_HEIGHT)
@@ -264,10 +214,10 @@ function update() {
   // the size stays locked. markBarSlot's reserved height (needed once
   // mark-bar is removed from flow) is captured right at this
   // transition, by which point the scale update above has already
-  // sized the mark for the current scroll position, rather than
-  // cached once up front the way contactHeadingSlot's is -- the mark's
-  // own natural height keeps changing while scrolling, so there's no
-  // single natural value to cache ahead of time.
+  // sized the mark for the current scroll position, rather than cached
+  // once up front -- the mark's own natural height keeps changing
+  // while scrolling, so there's no single natural value to cache ahead
+  // of time.
   if (markIsPinned) {
     if (y < markPinScrollY - HYSTERESIS) {
       markIsPinned = false;
@@ -279,6 +229,9 @@ function update() {
   }
   markBar.classList.toggle('is-pinned', markIsPinned);
 }
+
+const contactFader = createFader(contactHeading);
+const contactSectionFader = createFader(contactSectionHeading);
 
 measure();
 update();
