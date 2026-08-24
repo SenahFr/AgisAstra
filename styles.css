@@ -144,6 +144,14 @@ a:hover { border-color: var(--ink); }
   max-width: 1920px;
   margin: 0 auto;
   min-height: 100vh;
+  /* Redeclared, not replaced: 100vh is the fallback for browsers that
+     don't support dvh. On mobile, 100vh is the *largest* possible
+     viewport height (address bar collapsed) -- sized to that while
+     the address bar is still showing leaves extra blank space below
+     the fold that only closes up (with a jump) once the bar
+     auto-hides on scroll. 100dvh tracks the *current* visible height
+     instead, avoiding that. */
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -142,8 +142,18 @@ function measure() {
   // Measured live (not a hand-picked offset) since both paragraphs'
   // line counts -- and so the natural gap between the two baselines --
   // change with whatever copy ends up in either of them.
+  //
+  // Only makes sense side by side: below the 760px breakpoint where
+  // .details switches to a single stacked column (styles.css), .blurb
+  // sits in normal flow far below .contact rather than roughly level
+  // with it, so "aligning" their baselines would mean shifting this
+  // whole group down by however much of the *entire first column*
+  // precedes .blurb on a stacked layout -- hundreds of px of blank
+  // space for no visual reason. Skipped entirely there instead.
   contactSectionHeading.style.marginTop = '0px';
-  contactSectionHeading.style.marginTop = (baselineY(blurb) - baselineY(phoneLink)) + 'px';
+  if (window.matchMedia('(min-width: 760px)').matches) {
+    contactSectionHeading.style.marginTop = (baselineY(blurb) - baselineY(phoneLink)) + 'px';
+  }
 }
 
 function update() {
