@@ -298,16 +298,9 @@ a:hover { border-color: var(--ink); }
 
 .contact-heading-slot {
   display: flow-root;
-  /* Pulls this whole trailing group (Contact's slot, Custos
-     Libri/Bennie Trela, and the email/phone block) up together so the
-     phone number's own text baseline -- not just its box edge -- lands
-     even with the baseline of .blurb's last line opposite it in the
-     other column (their font-size/line-height differ, so the natural
-     gap above each isn't the same). Applied here rather than on
-     .contact alone so the spacing *within* the group (name to email to
-     phone) stays exactly as authored. Calibrated at the 1434px
-     reference viewport. */
-  margin-top: clamp(-150px, -7.29vw, -75px);
+  /* margin-top is set live by script.js's measure() -- see there for
+     why: a fixed value here would need re-tuning by hand every time
+     either paragraph's copy changes. */
 }
 
 .contact-sentinel {

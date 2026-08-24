@@ -5,6 +5,8 @@ const markBarSlot = document.getElementById('markBarSlot');
 const markBar = document.getElementById('markBar');
 const mark = document.getElementById('mark');
 const scrollSpacer = document.getElementById('scrollSpacer');
+const phoneLink = document.querySelector('.contact a[href^="tel:"]');
+const blurb = document.querySelector('.blurb');
 
 const EARLY_THRESHOLD = 24; // scroll past this before "Contact" appears pinned
 const HYSTERESIS = 16; // px of scroll buffer at each boundary before it can flip back
@@ -83,6 +85,21 @@ function stepFade(now) {
 // update() -- since unlike Contact, the mark's own size continuously
 // changes while scrolling, so there's no single "natural" height to
 // cache here.)
+// The Y coordinate of an element's own last line of text, as rendered
+// -- not just its box edge, which sits some line-height-dependent
+// distance below it. Standard trick: a zero-size inline-block aligned
+// to "baseline" renders exactly on the text baseline it's inserted
+// next to, so appending one and reading its own rect.top gives the
+// baseline's true position for free.
+function baselineY(el) {
+  const marker = document.createElement('span');
+  marker.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline;';
+  el.appendChild(marker);
+  const y = marker.getBoundingClientRect().top;
+  marker.remove();
+  return y;
+}
+
 function measure() {
   const prevClasses = [...contactHeading.classList].filter((c) => c !== 'contact-heading');
   contactHeading.classList.remove(...prevClasses);
@@ -127,6 +144,18 @@ function measure() {
   // that point is itself a function of how close scroll has gotten to
   // it -- adds exactly that same half-the-total-shrink offset back on.
   markPinScrollY = markNaturalTop + (markIntroHeight - MARK_SETTLED_HEIGHT) / 2;
+
+  // Lines up the phone number's own text baseline with the baseline of
+  // .blurb's last line opposite it in the other column, by shifting
+  // the whole trailing group (Contact's slot, Custos Libri/Bennie
+  // Trela, and the email/phone block) up or down as one unit --
+  // applied to contactHeadingSlot rather than .contact alone so the
+  // spacing *within* the group stays exactly as authored. Measured
+  // live (not a hand-picked offset) since both paragraphs' line counts
+  // -- and so the natural gap between the two baselines -- change with
+  // whatever copy ends up in either of them.
+  contactHeadingSlot.style.marginTop = '0px';
+  contactHeadingSlot.style.marginTop = (baselineY(blurb) - baselineY(phoneLink)) + 'px';
 
   // Contact's sentinel (in .details) needs to be able to reach the
   // viewport top for is-locked to ever engage -- see the comment on
