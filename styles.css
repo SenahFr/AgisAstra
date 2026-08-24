@@ -130,29 +130,6 @@ a:hover { border-color: var(--ink); }
   background-position: 0% 0;
 }
 
-/* Placeholder boxes -- stand in for photography (the logomark above is
-   the real asset; these image slots are still awaiting real photos). */
-
-.image-placeholder {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed var(--line-strong);
-  background: repeating-linear-gradient(
-    135deg,
-    #eae7e0,
-    #eae7e0 12px,
-    #e0dcd3 12px,
-    #e0dcd3 24px
-  );
-  color: var(--ink-soft);
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
 /* Header */
 
 .site-header {
@@ -436,8 +413,17 @@ a:hover { border-color: var(--ink); }
 }
 
 .secondary-img {
+  display: block;
+  width: 100%;
   aspect-ratio: 16 / 11;
   margin-bottom: 24px;
+  object-fit: cover;
+  /* The source photo is a 2:3 portrait, much taller/narrower than this
+     16:11 crop, so most of its height is necessarily cropped away --
+     3.7% keeps the crop anchored near the top of the photo so her full
+     face (not just eyes-down) stays in frame, rather than the default
+     center position cutting off her hairline. */
+  object-position: center 3.7%;
 }
 
 .blurb {
